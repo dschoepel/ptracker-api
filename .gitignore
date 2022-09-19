@@ -104,8 +104,4 @@ dist
 .tern-port
 
 # environment settings
-<<<<<<< HEAD
 .env
-=======
-.env
->>>>>>> ee61ab5 (Project initialization)
