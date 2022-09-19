@@ -40,8 +40,9 @@ app.use((req, res, next) => {
 });
 
 // Connect to Mongoose database
-const db = require("./v1/models");
+const db = require("../src/v1/models");
 const Role = db.role;
+console.log("DB URL = ", dbConfig.DB_URL);
 db.mongoose
   .connect(`${dbConfig.DB_URL}`, {
     autoIndex: true,
