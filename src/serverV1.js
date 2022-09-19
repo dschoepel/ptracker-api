@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 // Connect to Mongoose database
 const db = require("../src/v1/models");
 const Role = db.role;
-console.log("DB URL = ", dbConfig.DB_URL);
+
 db.mongoose
   .connect(`${dbConfig.DB_URL}`, {
     autoIndex: true,
@@ -69,6 +69,7 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log("Dirname = ", __dirname);
+  console.log("DB URL = ", dbConfig.DB_URL);
   console.log(`Server is running on port ${PORT}.`);
   V1SwaggerDocs(app, PORT);
 });
