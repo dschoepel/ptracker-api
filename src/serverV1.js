@@ -9,7 +9,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const fs = require("fs");
 
-const dbConfig = require("../src/v1/config/db.config");
+const dbConfig = require(path.join(__dirname, "./v1/config/db.config"));
 
 const { swaggerDocs: V1SwaggerDocs } = require("./v1/utils/swagger");
 
