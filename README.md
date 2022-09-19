@@ -1,3 +1,3 @@
-![portfolioTracker API](/src/v1/images/pTrackerLogo1.png "portfolioTracker Logo")
+# ![portfolioTracker API](/src/v1/images/pTrackerLogo1.png "portfolioTracker Logo")
 
-# portfolioTracker API
+## API for the front end web application
