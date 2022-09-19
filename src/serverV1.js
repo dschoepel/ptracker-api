@@ -11,11 +11,14 @@ const fs = require("fs");
 
 const dbConfig = require(path.join(__dirname, "./v1/config/db.config"));
 
-const { swaggerDocs: V1SwaggerDocs } = require("./v1/utils/swagger");
+const { swaggerDocs: V1SwaggerDocs } = require(path.join(
+  __dirname,
+  "./v1/utils/swagger"
+));
 
-const v1AuthRouter = require("./v1/routes/auth.routes");
-const v1userRouter = require("./v1/routes/user.routes");
-const v1FileRouter = require("./v1/routes/file.routes");
+const v1AuthRouter = require(path.join(__dirname, "./v1/routes/auth.routes"));
+const v1userRouter = require(path.join(__dirname, "./v1/routes/user.routes"));
+const v1FileRouter = require(path.join(__dirname, "./v1/routes/file.routes"));
 
 const app = express();
 const PORT = process.env.API_PORT || 8080;
@@ -40,7 +43,7 @@ app.use((req, res, next) => {
 });
 
 // Connect to Mongoose database
-const db = require("../src/v1/models");
+const db = require(path.join(__dirname, "./v1/models"));
 const Role = db.role;
 
 db.mongoose
