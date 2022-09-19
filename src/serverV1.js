@@ -1,6 +1,6 @@
 require("express-async-errors");
-require("dotenv").config({ path: "../.env" });
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../", ".env") });
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const express = require("express");
