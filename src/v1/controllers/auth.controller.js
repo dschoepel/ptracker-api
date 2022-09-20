@@ -332,9 +332,7 @@ exports.updateProfile = async (req, res) => {
 
   // Email changed?
   if (!newEmail || newEmail.trim() === "") {
-    return res.status(400).send({
-      message: `The email cannot be blank, specify current email or a new email address!`,
-    });
+    newEmail = user.email;
   } else {
     if (newEmail && newEmail.trim() != user.email.trim()) {
       user.isVerified = false;
@@ -344,9 +342,7 @@ exports.updateProfile = async (req, res) => {
 
   // User name changed?
   if (!newName || newName.trim() === "") {
-    return res.status(400).send({
-      message: `The username cannot be blank, specify current username or a new username!`,
-    });
+    newName = user.username;
   } else {
     if (newName && newName != user.username) {
       user.username = newName;
@@ -356,9 +352,7 @@ exports.updateProfile = async (req, res) => {
 
   // Remove old image if it is new and replace with a new image
   if (!newProfileImage || newProfileImage.trim() === "") {
-    return res.status(400).send({
-      message: `The profile image cannot be blank, specify an image file!`,
-    });
+    newProfileImage = user.profileImage;
   } else {
     if (newProfileImage && newProfileImage != user.profileImage) {
       try {
