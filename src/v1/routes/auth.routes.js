@@ -416,6 +416,22 @@ router.get("/getProfile", [authJwt.verifyToken], authController.getProfile);
  *      tags: [Auth]
  *      security:
  *        - bearerAuth: []
+ *      requestBody:
+ *        content:
+ *          multipart/form-data:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  description: New email address
+ *                username:
+ *                  type: string
+ *                  description: New user name
+ *                file:
+ *                  type: string
+ *                  format: binary
+ *                  description: New profile image (jpg, jpeg, or png)
  *      responses:
  *        200:
  *          description: OK - Updated profile details returned
