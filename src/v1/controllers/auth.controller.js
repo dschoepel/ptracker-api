@@ -331,39 +331,61 @@ exports.updateProfile = async (req, res) => {
   }
 
   // Email changed?
-  if (newEmail && newEmail.trim() != user.email.trim()) {
-    user.isVerified = false;
-    emailChanged = true;
+  if (!newEmail || newEmail.trim() === "") {
+    return res.status(400).send({
+      message: `The email cannot be blank, specify current email or a new email address!`,
+    });
+  } else {
+    if (newEmail && newEmail.trim() != user.email.trim()) {
+      user.isVerified = false;
+      emailChanged = true;
+    }
   }
 
   // User name changed?
-  if (newName && newName != user.username) {
-    user.username = newName;
-    nameChanged = true;
+  if (!newName || newName.trim() === "") {
+    return res.status(400).send({
+      message: `The username cannot be blank, specify current username or a new username!`,
+    });
+  } else {
+    if (newName && newName != user.username) {
+      user.username = newName;
+      nameChanged = true;
+    }
   }
 
   // Remove old image if it is new and replace with a new image
-  if (newProfileImage && newProfileImage != user.profileImage) {
-    try {
-      // Make sure new image is saved before removing old one
-      const newFilePath = path.join(req.file.destination, "/", newProfileImage);
-      const fileExists = fs.existsSync(newFilePath);
-      if (fileExists) {
-        // Remove old image if it exists
-        const oldFilePath = path.join(
+  if (!newProfileImage || newProfileImage.trim() === "") {
+    return res.status(400).send({
+      message: `The profile image cannot be blank, specify an image file!`,
+    });
+  } else {
+    if (newProfileImage && newProfileImage != user.profileImage) {
+      try {
+        // Make sure new image is saved before removing old one
+        const newFilePath = path.join(
           req.file.destination,
           "/",
-          user.profileImage
+          newProfileImage
         );
-        const oldfFileExists = fs.existsSync(oldFilePath);
-        if (oldfFileExists) {
-          clearImage(oldFilePath);
+        const fileExists = fs.existsSync(newFilePath);
+        if (fileExists) {
+          // Remove old image if it exists
+          const oldFilePath = path.join(
+            req.file.destination,
+            "/",
+            user.profileImage
+          );
+          const oldfFileExists = fs.existsSync(oldFilePath);
+          if (oldfFileExists) {
+            clearImage(oldFilePath);
+          }
         }
+        user.profileImage = newProfileImage;
+        imageChanged = true;
+      } catch (error) {
+        res.status(500).send({ message: error });
       }
-      user.profileImage = newProfileImage;
-      imageChanged = true;
-    } catch (error) {
-      res.status(500).send({ message: error });
     }
   }
 
