@@ -449,6 +449,8 @@ router.get("/getProfile", [authJwt.verifyToken], authController.getProfile);
  *                isVerified: true
  *                createdAt: 2022-09-16T13:57:37.126Z
  *                updatedAt: 2022-09-17T20:45:37.489Z
+ *        400:
+ *          description: Form fields cannot be empty, use original values or new values
  *        401:
  *          description: Token has expired, request refresh or sign in again.
  *
