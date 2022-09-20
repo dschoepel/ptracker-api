@@ -72,7 +72,6 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log("Dirname = ", __dirname);
-  console.log("DB URL = ", dbConfig.DB_URL, process.env.DB_URL);
   console.log(`Server is running on port ${PORT}.`);
   V1SwaggerDocs(app, PORT);
 });
