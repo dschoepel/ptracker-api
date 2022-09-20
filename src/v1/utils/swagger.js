@@ -1,6 +1,7 @@
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const path = require("path");
+console.log("Swagger direname = ", __dirname);
 
 // Basic Meta information about this API
 const options = {
