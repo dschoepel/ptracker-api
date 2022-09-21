@@ -1,6 +1,7 @@
 const db = require("../models");
 const fs = require("fs");
 const path = require("path");
+const { validationResult } = require("express-validator");
 const uploadFile = require("../middleware/upload");
 const config = require("../config/auth.config");
 const sendEmail = require("../utils/email/sendEmail");
@@ -21,6 +22,13 @@ var crypto = require("crypto");
 
 // Signup user, /middleware/verifySignup has verified that new user can be added
 exports.signup = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+    });
+  }
   const profileImg = req.body.profileImage ? req.body.profileImage : "";
   const user = new User({
     username: req.body.username,
@@ -30,7 +38,9 @@ exports.signup = (req, res, next) => {
   });
   user.save((err, user) => {
     if (err) {
-      res.status(500).send({ message: err });
+      res.status(500).send({
+        message: err,
+      });
       return;
     }
     // If a role was specified, look it up in roles db and save user if role was valid
@@ -154,6 +164,14 @@ exports.verifyEmail = async (req, res) => {
 
 // Signin/login user, /middleware/authJwt has verified level of user access via token passed
 exports.signin = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+    });
+  }
+
   User.findOne({ email: req.body.email })
     .populate("roles", "-__v")
     .exec(async (err, user) => {
@@ -163,9 +181,9 @@ exports.signin = (req, res, next) => {
       }
       // Check for valid user (email is found on an account)
       if (!user) {
-        return res
-          .status(401)
-          .send({ message: `User with email "${req.body.email}" not found!` });
+        return res.status(401).send({
+          message: `User with email ${req.body.email} not found!`,
+        });
       }
 
       // Check for valid password
@@ -304,18 +322,22 @@ exports.updateProfile = async (req, res) => {
   let oldName = "";
   let imageChanged = false;
   let oldImage = "";
-  // Use multer to get multipart form data File and text fields
-  // TODO Handle proper upload of file from form
-  try {
-    await uploadFile(req, res);
-    // validate contents of the request and save new values
-    newEmail = req.body.email ? req.body.email : undefined;
-    newName = req.body.username ? req.body.username : undefined;
-    newProfileImage = req.file.filename ? req.file.filename : undefined;
-  } catch (error) {
-    return res.status(400).send({
-      message: `Unable to retrieve form data (email, username, profileImage) from request!`,
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message:
+        "Validation failed, data entered is incorrect, see error details!",
+      errors: errors.array(),
     });
+  }
+
+  // validate contents of the request and save new values
+  newName = req.body.username ? req.body.username : "";
+  newEmail = req.body.email ? req.body.email : "";
+  if (!req.file) {
+    newProfileImage = "";
+  } else {
+    newProfileImage = req.file.filename;
   }
 
   // Get user profile
@@ -489,6 +511,14 @@ exports.requestPasswordReset = async (req, res) => {
 
 // Parameters are userid and reset token from email, and new password
 exports.resetPassword = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message:
+        "Validation failed, data entered is incorrect, see error details!",
+      errors: errors.array(),
+    });
+  }
   const userId = req.body.userId;
   const token = req.body.token;
   const password = req.body.password;

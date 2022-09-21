@@ -1,5 +1,8 @@
-const { verifySignUp, authJwt } = require("../middleware");
-// const controller = require("../controllers/auth.controller");
+const { verifySignUp, authJwt, upload } = require("../middleware");
+const { body } = require("express-validator");
+const uploadFile = require("../middleware/upload");
+const db = require("../models");
+const { user: User } = db;
 
 const authController = require("../controllers/auth.controller");
 
@@ -142,6 +145,10 @@ const router = express.Router();
  *                  type: string
  *                  description: Password to be used with the account
  *                  example: myS3cr3tPa88w0rd1sb311er
+ *                passwordConfirmation:
+ *                  type: string
+ *                  description: Renetered password for validation
+ *                  example: myS3cr3tPa88w0rd1sb311er
  *                roles:
  *                  type: array
  *                  description: Roles this account has (user is default, admin)
@@ -181,6 +188,8 @@ const router = express.Router();
  *                email: jsmith@email.com
  *                profileImage: 63064217210aa88f433fe9cb-joesimage.jpg
  *                token: yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9yJpZCI6IjYzMDY0MjE3MjEwYWE4OG...
+ *        422:
+ *          description: Validation failed, entered data is incorrect
  *        500:
  *          description: Server error
  *
@@ -189,6 +198,48 @@ const router = express.Router();
 router.post(
   "/signup",
   [verifySignUp.checkDuplicateUsernameOrEmail, verifySignUp.checkRolesExist],
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email!")
+      .custom((value, { req }) => {
+        return User.findOne({ email: value }).then((userDoc) => {
+          if (userDoc) {
+            return Promise.reject("E-mail address already exists");
+          }
+        });
+      })
+      .normalizeEmail(),
+    body(
+      "password",
+      "Please enter a password at least 10 characters that contains At least one uppercase, At least one lower case, and At least one special character."
+    )
+      .trim()
+      .isStrongPassword({
+        minLength: 10,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+        returnScore: false,
+      })
+      .withMessage(
+        "Password must have at least 10 characters. Contains at least one uppercase, at least one lower case, and at least one special character."
+      ),
+    body("passwordConfirmation").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Password confirmation does not match password!");
+      }
+      return true;
+    }),
+    body("username")
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage("User name cannot be blank!")
+      .isLength({ min: 5, max: undefined })
+      .withMessage("User name must be at least 5 or more characters!"),
+  ],
   authController.signup
 );
 
@@ -304,7 +355,25 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
  *
  */
 
-router.post("/signin", authController.signin);
+router.post(
+  "/signin",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email!")
+      .custom((value, { req }) => {
+        return User.findOne({ email: value }).then((userDoc) => {
+          if (!userDoc) {
+            return Promise.reject(
+              "E-mail is not associated with an active account"
+            );
+          }
+        });
+      })
+      .normalizeEmail(),
+  ],
+  authController.signin
+);
 
 /**
  * @openapi
@@ -464,6 +533,19 @@ router.get("/getProfile", [authJwt.verifyToken], authController.getProfile);
 router.patch(
   "/updateProfile",
   [authJwt.verifyToken],
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email!")
+      .normalizeEmail(),
+    body("username")
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage("User name cannot be blank!")
+      .isLength({ min: 5, max: undefined })
+      .withMessage("User name must be at least 5 or more characters!"),
+  ],
   authController.updateProfile
 );
 
@@ -584,6 +666,10 @@ router.post("/requestPasswordReset", authController.requestPasswordReset);
  *                  type: string
  *                  description: Users new password
  *                  example: myNewPa88w0rd
+ *                passwordConfirmation:
+ *                  type: string
+ *                  description: Renter password to confirm
+ *                  example: myNewPa88w0rd
  *      responses:
  *        201:
  *          description: OK - Users password was reset, email sent to confirm
@@ -620,6 +706,33 @@ router.post("/requestPasswordReset", authController.requestPasswordReset);
  *          description: Server error
  *
  */
-router.post("/resetPassword", authController.resetPassword);
+router.post(
+  "/resetPassword",
+  [
+    body(
+      "password",
+      "Please enter a password at least 10 characters that contains At least one uppercase, At least one lower case, and At least one special character."
+    )
+      .trim()
+      .isStrongPassword({
+        minLength: 10,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+        returnScore: false,
+      })
+      .withMessage(
+        "Password must have at least 10 characters. Contains at least one uppercase, at least one lower case, and at least one special character."
+      ),
+    body("passwordConfirmation").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Password confirmation does not match password!");
+      }
+      return true;
+    }),
+  ],
+  authController.resetPassword
+);
 
 module.exports = router;

@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 // const connection = require("./v1/database/db");
 const cors = require("cors");
 const fs = require("fs");
+const uploadFile = require("./v1/middleware/upload");
+const { upload } = require("./v1/middleware");
 
 const dbConfig = require(path.join(__dirname, "/v1/config/db.config"));
 
@@ -30,6 +32,7 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(uploadFile);
 app.use("/images", express.static(path.join(__dirname, "v1", "images")));
 
 app.use((req, res, next) => {
