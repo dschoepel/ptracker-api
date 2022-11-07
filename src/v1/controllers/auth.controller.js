@@ -240,6 +240,7 @@ exports.signin = (req, res, next) => {
         roles: authorities,
         profileImage: user.profileImage,
         accessToken: token,
+        expiresIn: config.jwtExpiration,
         refreshToken: refreshToken,
       });
     });

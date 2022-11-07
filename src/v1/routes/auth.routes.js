@@ -338,6 +338,9 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
  *                  accessToken:
  *                    type: string
  *                    description: The JSON Web Token assigned to the login session
+ *                  expiresIn:
+ *                    type: number
+ *                    description: The JSON Web Token expiration in seconds
  *                  refreshToken:
  *                    type: string
  *                    description: Token used to refresh JSON Web Token when it has expired
@@ -348,6 +351,7 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
  *                roles: [ROLE_USER, ROLE_ADMIN]
  *                profileImage: 63064217210aa88f433fe9cb-joesimage.png
  *                accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMGJjZjEzMzBhZWM1MmEzMTA4ZmMyOCIsImlhdCI6MTY2MjUxNDY5NiwiZXhwIjoxNjYyNTE0NzU2fQ.-clo4W841gHkcruaHXq68dnPQPCXd2vRSXHTy4cWcEU
+ *                expiresIn: 3600
  *                refreshToken: 69499fda-00bf-405c-8d0b-1645b3f9e438
  *        500:
  *          description: Server error
