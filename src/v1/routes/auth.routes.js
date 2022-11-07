@@ -339,7 +339,7 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
  *                    type: string
  *                    description: The JSON Web Token assigned to the login session
  *                  expiresIn:
- *                    type: number
+ *                    type: integer
  *                    description: The JSON Web Token expiration in seconds
  *                  refreshToken:
  *                    type: string
