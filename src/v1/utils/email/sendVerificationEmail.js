@@ -22,7 +22,7 @@ const sendVerificationEmail = async (id, email) => {
     verificationToken = user.generateVerificationToken();
   }
   // Format the email link to verify the account
-  const verifyEmailLink = `${clientURL}/verifyEmail/${verificationToken}`;
+  const verifyEmailLink = `${clientURL}/emailVerification/${verificationToken}`;
 
   // Send confirm user email to complete registration
   sendEmail(

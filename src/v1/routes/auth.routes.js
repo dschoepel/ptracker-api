@@ -187,6 +187,7 @@ const router = express.Router();
  *                name: Joe Smith
  *                email: jsmith@email.com
  *                profileImage: 63064217210aa88f433fe9cb-joesimage.jpg
+ *                isVerified: false
  *                token: yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9yJpZCI6IjYzMDY0MjE3MjEwYWE4OG...
  *        422:
  *          description: Validation failed, entered data is incorrect
@@ -288,6 +289,163 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
 /**
  * @openapi
  * paths:
+ *  /api/v1/auth/reVerifyEmail:
+ *    post:
+ *      summary: Resend request to verify email for a new account
+ *      tags: [Auth]
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  description: Account user's email
+ *                  example: jsmith@email.com
+ *              required:
+ *                - email
+ *      responses:
+ *        200:
+ *          description: OK - Account with email exists, resent verification email
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Confirmation that an email was sent
+ *                  schema:
+ *                    type: object
+ *                    properies:
+ *                      id:
+ *                        type: string
+ *                        description: The (BSON Mongo based) auto generated user id
+ *                      username:
+ *                        type: string
+ *                        description: The users name
+ *                      email:
+ *                        type: string
+ *                        description: The user's email
+ *                      roles:
+ *                        type: array
+ *                        description: Array list of authorized roles for this user account
+ *                        items:
+ *                          type: string
+ *                      profileImage:
+ *                          type: string
+ *                          description: User selected profile image file name
+ *                      accessToken:
+ *                        type: string
+ *                        description: The JSON Web Token assigned to the login session
+ *                      expiresIn:
+ *                        type: integer
+ *                        description: The JSON Web Token expiration in seconds
+ *                      refreshToken:
+ *                        type: string
+ *                        description: Token used to refresh JSON Web Token when it has expired
+ *              example:
+ *                message: User registration pending email verification!
+ *                id: 63064217210aa88f433fe9cb
+ *                username: Joe Smith
+ *                email: jsmith@email.com
+ *                roles: [ROLE_USER, ROLE_ADMIN]
+ *                profileImage: 63064217210aa88f433fe9cb-joesimage.png
+ *                isVerified: false
+ *                accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMGJjZjEzMzBhZWM1MmEzMTA4ZmMyOCIsImlhdCI6MTY2MjUxNDY5NiwiZXhwIjoxNjYyNTE0NzU2fQ.-clo4W841gHkcruaHXq68dnPQPCXd2vRSXHTy4cWcEU
+ *                expiresIn: 3600
+ *                refreshToken: 69499fda-00bf-405c-8d0b-1645b3f9e438
+ *
+ *        401:
+ *          description: Validation failed, user account not found for email
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Confirmation that an email was sent
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Reason for error (EMAIL_NOT_FOUND)
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Flag to indicate there was an error to handle
+ *              example:
+ *                message: Account with email jsmith@email.com not found!
+ *                errorStatus: EMAIL_NOT_FOUND
+ *                errorFlag: true
+ *        409:
+ *          description: "Error-Conflict, Email has already been verified."
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Description of response
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Reason for error (EMAIL_IS_VERIFIED)
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Flag to indicate there was an error to handle
+ *              example:
+ *                message: Your account email has already been verified!
+ *                errorStatus: EMAIL_IS_VERIFIED
+ *                errorFlag: true
+ *        422:
+ *          description: "Error-Unprocessable Entity, Email not associated with Account."
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Description of response
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Reason for error (EMAIL_IS_VERIFIED)
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Flag to indicate there was an error to handle
+ *              example:
+ *                message: E-mail is not associated with an active account!
+ *
+ *        500:
+ *          description: Server error
+ *
+ *
+ */
+
+router.post(
+  "/reVerifyEmail",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email!")
+      .custom((value, { req }) => {
+        return User.findOne({ email: value }).then((userDoc) => {
+          if (!userDoc) {
+            return Promise.reject(
+              "E-mail is not associated with an active account"
+            );
+          }
+        });
+      })
+      .normalizeEmail(),
+  ],
+  authController.reVerifyEmail
+);
+
+/**
+ * @openapi
+ * paths:
  *  /api/v1/auth/signin:
  *    post:
  *      summary: Sign in to server, obtain token and refresToken for subsequent requests
@@ -335,6 +493,9 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
  *                  profileImage:
  *                      type: string
  *                      description: User selected profile image file name
+ *                  isVerified:
+ *                    type: boolean
+ *                    description: Account email is verified (true/false)
  *                  accessToken:
  *                    type: string
  *                    description: The JSON Web Token assigned to the login session
@@ -350,6 +511,7 @@ router.patch("/verifyEmail/:token", authController.verifyEmail);
  *                email: jsmith@email.com
  *                roles: [ROLE_USER, ROLE_ADMIN]
  *                profileImage: 63064217210aa88f433fe9cb-joesimage.png
+ *                isVerified: true
  *                accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMGJjZjEzMzBhZWM1MmEzMTA4ZmMyOCIsImlhdCI6MTY2MjUxNDY5NiwiZXhwIjoxNjYyNTE0NzU2fQ.-clo4W841gHkcruaHXq68dnPQPCXd2vRSXHTy4cWcEU
  *                expiresIn: 3600
  *                refreshToken: 69499fda-00bf-405c-8d0b-1645b3f9e438

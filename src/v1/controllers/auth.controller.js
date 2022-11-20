@@ -19,6 +19,7 @@ const bcryptSalt = parseInt(process.env.BCRYPT_SALT);
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcrypt");
 var crypto = require("crypto");
+// const { use } = require("../routes/auth.routes");
 
 // Signup user, /middleware/verifySignup has verified that new user can be added
 exports.signup = (req, res, next) => {
@@ -29,7 +30,9 @@ exports.signup = (req, res, next) => {
       errors: errors.array(),
     });
   }
-  const profileImg = req.body.profileImage ? req.body.profileImage : "";
+  const profileImg = req.body.profileImage
+    ? req.body.profileImage
+    : "defaultperson.png";
   const user = new User({
     username: req.body.username,
     email: req.body.email,
@@ -107,21 +110,36 @@ exports.verifyEmail = async (req, res) => {
   try {
     payload = jwt.verify(token, SECRET);
   } catch (error) {
-    return res
-      .status(500)
-      .send({ message: `Invalid token! Error detail: ${error}` });
+    let errorStatus = "CHECK_DETAIL";
+    let errorMessage = error.toString();
+
+    if (errorMessage.includes("TokenExpiredError")) {
+      errorStatus = "EXPIRED";
+    } else if (errorMessage.includes("signature")) {
+      errorStatus = "SIGNATURE";
+    } else if (errorMessage.includes("malformed")) {
+      errorStatus = "MALFORMED";
+    }
+
+    return res.status(500).send({
+      message: `Invalid token! Error detail: ${error}`,
+      errorStatus: errorStatus,
+    });
   }
 
   User.findOne({ _id: payload.ID }).exec(async (err, user) => {
     if (err) {
-      res
-        .status(500)
-        .send({ message: `Cannot access user database! Error detail: ${err}` });
+      res.status(500).send({
+        message: `Cannot access user database! Error detail: ${err}`,
+        errorStatus: errorStatus,
+      });
       return;
     }
     if (!user) {
+      errorStatus = "INVALID_USER";
       return res.status(404).send({
         message: `User from token payload, "${payload.ID}", does not exist!  Payload details: ${payload}`,
+        errorStatus: errorStatus,
       });
     }
     // Was this an email change on profile?
@@ -146,6 +164,7 @@ exports.verifyEmail = async (req, res) => {
           "Welcome To portfolioTracker: Your account has been activated!", // Subject
           {
             name: user.username,
+            link: clientURL,
           },
           "/templates/welcome.ejs" // Welcome Message Template
         );
@@ -162,6 +181,52 @@ exports.verifyEmail = async (req, res) => {
   });
 };
 
+// Re-verify email, specify email and receive a new token to use for verification
+exports.reVerifyEmail = (req, res, next) => {
+  // const errors = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   return res.status(422).send({
+  //     message: "Validation failed, entered data is incorrect!",
+  //     errors: errors.array(),
+  //   });
+  // }
+  User.findOne({ email: req.body.email })
+    .populate("roles", "-__v")
+    .exec(async (err, user) => {
+      if (err) {
+        res
+          .status(500)
+          .send({ message: err, errorStatus: "SYSTEM", errorFlag: true });
+        return;
+      }
+      // Check for valid user (email is found on an account)
+      if (!user) {
+        return res.status(401).send({
+          message: `Account with email ${req.body.email} not found!`,
+          errorStatus: "EMAIL_NOT_FOUND",
+          errorFlag: true,
+        });
+      }
+
+      // Make sure email has not been verified
+      if (user.isVerified) {
+        return res.status(409).send({
+          message: `Your account email has already been verified!`,
+          errorStatus: "EMAIL_IS_VERIFIED",
+          errorFlag: true,
+        });
+      }
+
+      // Send email verification link to users email address
+      sendVerificationEmail(user._id, user.email);
+
+      res.status(200).send({
+        message: "User registration pending email verification!",
+        User: user,
+      });
+    });
+};
+
 // Signin/login user, /middleware/authJwt has verified level of user access via token passed
 exports.signin = (req, res, next) => {
   const errors = validationResult(req);
@@ -176,13 +241,18 @@ exports.signin = (req, res, next) => {
     .populate("roles", "-__v")
     .exec(async (err, user) => {
       if (err) {
-        res.status(500).send({ message: err });
+        res
+          .status(500)
+          .send({ message: err, errorStatus: "SYSTEM", errorFlag: true });
         return;
       }
+      // 401 Errors need a status code to define the exact problem
       // Check for valid user (email is found on an account)
       if (!user) {
         return res.status(401).send({
           message: `User with email ${req.body.email} not found!`,
+          errorStatus: "EMAIL_NOT_FOUND",
+          errorFlag: true,
         });
       }
 
@@ -192,16 +262,21 @@ exports.signin = (req, res, next) => {
         user.password
       );
       if (!passwordIsValid) {
-        return res
-          .status(401)
-          .send({ accessToken: null, message: "Invalid Password!" });
+        return res.status(401).send({
+          accessToken: null,
+          message: "Invalid Password!",
+          errorStatus: "INVALID_PASSWORD",
+          errorFlag: true,
+        });
       }
 
       // Make sure email has been verified
       if (!user.isVerified) {
-        return res
-          .status(401)
-          .send({ message: `User's email has not been verified!` });
+        return res.status(401).send({
+          message: `User's email has not been verified!`,
+          errorStatus: "EMAIL_NOT_VERIFIED",
+          errorFlag: true,
+        });
       }
 
       // Ok to Log in to user account
@@ -239,9 +314,11 @@ exports.signin = (req, res, next) => {
         email: user.email,
         roles: authorities,
         profileImage: user.profileImage,
+        isVerified: user.isVerified,
         accessToken: token,
         expiresIn: config.jwtExpiration,
         refreshToken: refreshToken,
+        errorFlag: false,
       });
     });
 };

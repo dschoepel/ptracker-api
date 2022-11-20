@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/serverV1.js"
+    "dev": "nodemon --trace-warnings src/serverV1.js"
   },
   "author": "Dave J Schoepel",
   "license": "ISC",
