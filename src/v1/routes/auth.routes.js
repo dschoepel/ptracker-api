@@ -703,6 +703,7 @@ router.patch(
     body("email")
       .isEmail()
       .withMessage("Please enter a valid email!")
+
       .normalizeEmail(),
     body("username")
       .trim()
@@ -800,6 +801,26 @@ router.post("/refreshtoken", authController.refreshToken);
  *                description: The URL link to reset the password
  *                example: localhost://3000/passwordReset?token=89216ff2c3969a722d746464899aee57be4cdf412164e05e6e7d19300f472a67&id=63064217210aa88f433fe9cb
  *
+ *        404:
+ *          description: Email not found. It is not associated with an account.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Email for password reset not found
+ *                    example: Email does not exist!
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Error code
+ *                    example: EMAIL_NOT_FOUND
+ *
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Error indicator
+ *                    example: true
  *        500:
  *          description: Server error
  *
@@ -867,7 +888,38 @@ router.post("/requestPasswordReset", authController.requestPasswordReset);
  *                    type: boolean
  *                    description: Success indicator
  *                    example: false
-
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Error status code
+ *                    example: TOKEN_EXPIRED
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Error occured flag
+ *                    example: true
+ *        422:
+ *          description: Validation error - check errors array for messages
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Validation checks failed
+ *                    example: Validation failed, data entered is incorrect, see error details!
+ *                  errors:
+ *                    type: array
+ *                    description: Array containg 1 or more validation error messages
+ *                    items:
+ *                      type: string
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Validation error code
+ *                    example: VALIDATION
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Error occured flag
+ *                    example: true
  *        500:
  *          description: Server error
  *
@@ -877,7 +929,7 @@ router.post(
   [
     body(
       "password",
-      "Please enter a password at least 10 characters that contains At least one uppercase, At least one lower case, and At least one special character."
+      "Please enter a password at least 10 characters that contains At least one uppercase, At least one lower case, and at least one special character."
     )
       .trim()
       .isStrongPassword({
@@ -899,6 +951,112 @@ router.post(
     }),
   ],
   authController.resetPassword
+);
+
+/**
+ * @openapi
+ * paths:
+ *  /api/v1/auth/changePassword:
+ *    patch:
+ *      summary: Change a password for a user account
+ *      tags: [Auth]
+ *      security:
+ *        - bearerAuth: []
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                currentPassword:
+ *                  type: string
+ *                  description: Users current password
+ *                  example: Mypassw0rd1s@780f33t
+ *                newPassword:
+ *                  type: string
+ *                  description: Users new password
+ *                  example: myNewPa88w0rd
+ *                confirmPassword:
+ *                  type: string
+ *                  description: Confirming Users new password
+ *                  example: myNewPa88w0rd
+ *      responses:
+ *        201:
+ *          description: OK - Users password was changed, email sent to confirm
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Password change result message
+ *                    example: Password has been changed!
+ *                  success:
+ *                    type: boolean
+ *                    description: Success indicator
+ *                    example: true
+ *                  email:
+ *                    type: string
+ *                    description: Email used to send success message to.
+ *                    example: joe@smith.com
+ *        422:
+ *          description: Validation error - check errors array for messages
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    description: Validation checks failed
+ *                    example: Validation failed, data entered is incorrect, see error details!
+ *                  errors:
+ *                    type: array
+ *                    description: Array containg 1 or more validation error messages
+ *                    items:
+ *                      type: string
+ *                  errorStatus:
+ *                    type: string
+ *                    description: Validation error code
+ *                    example: VALIDATION
+ *                  errorFlag:
+ *                    type: boolean
+ *                    description: Error occured flag
+ *                    example: true
+ *        500:
+ *          description: Server error
+ *
+ */
+router.patch(
+  "/changePassword",
+  [authJwt.verifyToken],
+  [
+    body(
+      "newPassword",
+      "Please enter a password at least 10 characters that contains At least one uppercase, At least one lower case, and at least one special character."
+    )
+      .trim()
+      .isStrongPassword({
+        minLength: 10,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+        returnScore: false,
+      })
+      .withMessage(
+        "Password must have at least 10 characters. Contains at least one uppercase, at least one lower case, and at least one special character."
+      ),
+    body("confirmPassword").custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error("Password confirmation does not match password!");
+      }
+      return true;
+    }),
+  ],
+  authController.changePassword
 );
 
 module.exports = router;

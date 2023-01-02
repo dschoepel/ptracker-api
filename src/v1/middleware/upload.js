@@ -8,8 +8,7 @@ let storage = multer.diskStorage({
     cb(null, path.join(__dirname, "../", "/images"));
   },
   filename: (req, file, cb) => {
-    console.log(file.originalname);
-    cb(null, req.userId + "-" + file.originalname);
+    cb(null, file.originalname);
   },
 });
 

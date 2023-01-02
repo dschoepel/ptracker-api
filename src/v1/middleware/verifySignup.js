@@ -7,11 +7,19 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
     username: req.body.username,
   }).exec((err, user) => {
     if (err) {
-      res.status(500).send({ message: err });
+      res
+        .status(500)
+        .send({ message: err, errorStatus: "SYSTEM", errorFlag: true });
       return;
     }
     if (user) {
-      res.status(400).send({ message: "Failed! Username is already in use!" });
+      res
+        .status(400)
+        .send({
+          message: "Failed! Username is already in use!",
+          errorStatus: "USERNAME_IN_USE",
+          errorFlag: true,
+        });
       return;
     }
     // Email
@@ -19,11 +27,19 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
       email: req.body.email,
     }).exec((err, user) => {
       if (err) {
-        res.status(500).send({ message: err });
+        res
+          .status(500)
+          .send({ message: err, errorStatus: "SYSTEM", errorFlag: true });
         return;
       }
       if (user) {
-        res.status(400).send({ message: "Failed! Email is already in use!" });
+        res
+          .status(400)
+          .send({
+            message: "Failed! Email is already in use!",
+            errorStatus: "EMAIL_IN_USE",
+            errorFlag: true,
+          });
         return;
       }
       next();
@@ -36,6 +52,8 @@ checkRolesExist = (req, res, next) => {
       if (!ROLES.includes(req.body.roles[i])) {
         res.status(400).send({
           message: `Failed! Role ${req.body.roles[i]} does not exist!`,
+          errorStatus: "INVALID_ROLE",
+          errorFlag: true,
         });
         return;
       }
