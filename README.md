@@ -1,3 +1,3 @@
-# <img style="width:15%" src="/src/v1/images/pTracker_icon1.png"/> portfolio<span style="color: #ffc107">Traker</span>
+# ![portfolioTracker API](/src/v1/images/PTracker_01.png "portfolioTracker Logo")
 
 ## API for the front end web application
