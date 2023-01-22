@@ -390,7 +390,7 @@ exports.signout = async (req, res) => {
   });
 };
 
-// Retrieves the user profile information from the id in the token
+// Retrieves the user profile information from the id in the token (authJwt adds userId to req)
 exports.getProfile = (req, res, next) => {
   const userId = req.userId;
   if (userId == undefined) {

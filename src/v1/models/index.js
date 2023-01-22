@@ -11,4 +11,7 @@ db.resetPasswordToken = require(path.join(
   "/resetPasswordToken.model"
 ));
 db.ROLES = ["user", "admin"];
+db.portfolio = require(path.join(__dirname, "/portfolio.model"));
+db.asset = require(path.join(__dirname, "/asset.model"));
+db.lot = require(path.join(__dirname, "/lot.model"));
 module.exports = db;

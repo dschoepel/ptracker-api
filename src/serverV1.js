@@ -21,6 +21,10 @@ const { swaggerDocs: V1SwaggerDocs } = require(path.join(
 const v1AuthRouter = require(path.join(__dirname, "./v1/routes/auth.routes"));
 const v1userRouter = require(path.join(__dirname, "./v1/routes/user.routes"));
 const v1FileRouter = require(path.join(__dirname, "./v1/routes/file.routes"));
+const v1PortfolioRouter = require(path.join(
+  __dirname,
+  "./v1/routes/portfolio.routes"
+));
 
 const app = express();
 const PORT = process.env.API_PORT || 8080;
@@ -66,6 +70,7 @@ db.mongoose
 app.use("/api/v1/auth", v1AuthRouter);
 app.use("/api/v1/test", v1userRouter);
 app.use("/api/v1/file", v1FileRouter);
+app.use("/api/v1/portfolio", v1PortfolioRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to Dave's application." });
