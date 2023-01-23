@@ -171,19 +171,28 @@ router.post(
 // Get a Portfolio for a user account
 //
 router.get(
-  "/getPortfolio/:portfolioId",
+  "/getOnePortfolio/:portfolioId",
   [authJwt.verifyToken],
   [validate.verifyPortfolioId],
-  portfolioController.getPortfolio
+  portfolioController.getOnePortfolio
 );
 
 //
 // Get all of a users Portfolios
 //
 router.get(
-  "/getPortfolios",
+  "/getLotsByPortfolio",
   [authJwt.verifyToken],
-  portfolioController.getPortfolios
+  portfolioController.getLotsByPortfolio
+);
+
+//
+// Get User Portfolios
+//
+router.get(
+  "/getUserPortfolios",
+  [authJwt.verifyToken],
+  portfolioController.getUserPortfolios
 );
 
 //

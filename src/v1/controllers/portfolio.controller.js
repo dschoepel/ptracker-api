@@ -165,7 +165,7 @@ const deletePortfolio = async (req, res, next) => {
   const { userId } = req;
   const { portfolioId } = req.body;
 
-  // 1. Remove assets for portfolio (includes lots)
+  // 1. Remove lots for portfolio
   const portfolioDetail = await Portfolio.findOne({ _id: portfolioId }).catch(
     (error) => {
       return res.status(404).send({
@@ -370,9 +370,9 @@ const removePortfolioAsset = async (req, res, next) => {
 };
 
 //
-// Get a PORTFOLIO
+// Get One specific PORTFOLIO
 //
-const getPortfolio = async (req, res, next) => {
+const getOnePortfolio = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).send({
@@ -411,9 +411,49 @@ const getPortfolio = async (req, res, next) => {
 };
 
 //
+// Get a specific PORTFOLIO
+//
+const getUserPortfolios = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+  const { userId } = req;
+
+  const portfolioDetailArray = await Portfolio.find({ userId: userId })
+    .populate("assets")
+    .populate("userId", "username")
+    .then((portfolioArray) => {
+      return portfolioArray;
+    })
+    .catch((error) => {
+      res.status(204).send({
+        message: `Error: There were no records retrieved for ${userId}!  Additional error details: ${error}`,
+        successFlag: "NOT-FOUND",
+        success: false,
+        errorFlag: true,
+        portfolioDetailArray: [],
+      });
+    });
+
+  res.status(200).send({
+    message: `The Portfolios for userId "${userId}" were retrieved for!`,
+    successFlag: "OK",
+    success: true,
+    errorFlag: false,
+    portfolioDetailArray: portfolioDetailArray,
+  });
+};
+
+//
 // Get all of the Users PORTFOLIOS
 //
-const getPortfolios = async (req, res, next) => {
+const getLotsByPortfolio = async (req, res, next) => {
   const { userId } = req;
 
   //Retrieve all lots associated with the user and sort by portfolio name, asset, lot acquired date (desc)
@@ -723,8 +763,9 @@ module.exports = {
   deletePortfolio,
   addPortfolioAsset,
   removePortfolioAsset,
-  getPortfolio,
-  getPortfolios,
+  getOnePortfolio,
+  getUserPortfolios,
+  getLotsByPortfolio,
   addAsset,
   addLot,
   updateLot,
