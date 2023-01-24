@@ -29,14 +29,16 @@ const addPortfolio = async (req, res, next) => {
   // A portfolio can be created with no assets
   //
   let assetIds = [];
-  for (let i = 0; i < assets.length; i++) {
-    const response = await ps.getAsset(assets[i]);
-    if (!response.error) {
-      assetIds.push(response.assetId);
-    } else {
-      const response = await ps.addAsset(assets[i]);
-      if (response.success) {
-        assetIds.push(response.asset._id);
+  if (assets) {
+    for (let i = 0; i < assets.length; i++) {
+      const response = await ps.getAsset(assets[i]);
+      if (!response.error) {
+        assetIds.push(response.assetId);
+      } else {
+        const response = await ps.addAsset(assets[i]);
+        if (response.success) {
+          assetIds.push(response.asset._id);
+        }
       }
     }
   }
