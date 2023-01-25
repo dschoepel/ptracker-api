@@ -11,7 +11,7 @@ const { portfolio: Portfolio, user: User, asset: Asset, lot: Lot } = db;
 // ADD a New Portfolio
 //
 const addPortfolio = async (req, res, next) => {
-  console.log("Starting add portfolio!......");
+  console.log("Starting add portfolio!......", req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).send({
