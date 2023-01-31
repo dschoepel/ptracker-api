@@ -17,7 +17,6 @@ async function getQuote(symbol) {
         console.log("Symbol Fetch error - result missing", data?.quoteResponse);
       } else {
         // Found symbol
-        console.log(detail);
         return { ...detail[0] };
       }
     })

@@ -444,7 +444,7 @@ const getUserPortfolios = async (req, res, next) => {
     });
 
   res.status(200).send({
-    message: `The Portfolios for userId "${userId}" were retrieved for!`,
+    message: `The Portfolios for userId "${userId}" were retrieved!`,
     successFlag: "OK",
     success: true,
     errorFlag: false,
@@ -501,6 +501,7 @@ const getLotsByPortfolio = async (req, res, next) => {
 const addAsset = async (req, res, next) => {
   const { symbol } = req.body;
   const response = await ps.addAsset(symbol);
+  console.log("fetch asset response: ", response);
   if (response.success) {
     res.status(201).send({
       id: response.assetId,
@@ -510,7 +511,7 @@ const addAsset = async (req, res, next) => {
       statusCode: "ASSET_ADDED",
     });
   } else {
-    if ((response.assetId = "SYMBOL_NOT_FOUND")) {
+    if (response.assetId === "SYMBOL_NOT_FOUND") {
       res.status(400).send({
         id: response.assetId,
         message: `Symbol lookup failed to find "${response.assetSymbol}" using the Yahoo Finance API! `,
@@ -753,7 +754,7 @@ const getQuote = async (req, res) => {
       errorFlag: false,
       errorStatus: "OK",
       delayedPrice: quote.regularMarketPrice,
-      deleayedChange: quote.regularMarketChange,
+      delayedChange: quote.regularMarketChange,
       quoteDetail: quote,
     });
   }

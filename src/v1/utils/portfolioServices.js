@@ -192,6 +192,7 @@ async function addAsset(symbol) {
   } else {
     // Already existing in database,
     if (quoteType !== "Not Found") {
+      console.log("quote type: ", quoteType, assetFound);
       return {
         assetSymbol: assetFound.assetSymbol,
         assetId: assetFound._id,
