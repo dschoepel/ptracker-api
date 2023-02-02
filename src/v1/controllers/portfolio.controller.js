@@ -760,6 +760,63 @@ const getQuote = async (req, res) => {
   }
 };
 
+// *****
+// Get the history for a symbol from the Financial Api
+// *****
+const getHistory = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+
+  const symbol = req.query.symbol.toUpperCase();
+  const historyDetail = await fetchFinanceData
+    .getHistory(symbol)
+    .catch((error) => {
+      //TODO Handle errors
+      console.log(error);
+    });
+
+  if (!historyDetail) {
+    //TODO Handle errors
+  } else {
+    const history = historyDetail.chart.result[0];
+    let historyChart = [];
+    for (let i = 0; i < history.timestamp.length; ++i) {
+      const date = new Date(history.timestamp[i] * 1000);
+      const dateString =
+        date.getFullYear() +
+        "-" +
+        (date.getMonth() + 1).toString().padStart(2, "0") +
+        "-" +
+        date.getDate();
+      historyChart[i] = {
+        date: dateString,
+        price: history.indicators.quote[0].close[i],
+      };
+    }
+
+    return res.status(200).send({
+      message: `History for ${symbol} was successful!`,
+      success: true,
+      errorFlag: false,
+      errorStatus: "OK",
+      // delayedPrice: quote.regularMarketPrice,
+      // delayedChange: quote.regularMarketChange,
+      historyDetail: historyDetail.chart.result[0],
+      meta: historyDetail.chart.result[0].meta,
+      timeLine: historyDetail.chart.result[0].timeLine,
+      priceClose: historyDetail.chart.result[0].indicators.quote[0].close,
+      historyChart: historyChart,
+    });
+  }
+};
+
 module.exports = {
   addPortfolio,
   updatePortfolio,
@@ -774,4 +831,5 @@ module.exports = {
   updateLot,
   deleteLot,
   getQuote,
+  getHistory,
 };

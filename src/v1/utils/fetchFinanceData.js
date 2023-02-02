@@ -31,7 +31,7 @@ async function getQuote(symbol) {
 //Fetch company profile data from Yahoo finance
 async function getProfile(symbol) {
   let options = { method: "GET" };
-  const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=assetProfile`;
+  const url = `https://query1.finance.yahoo.com/v11/finance/quoteSummary/${symbol}?modules=assetProfile`;
   let detail = {};
 
   await fetch(url, options)
@@ -55,4 +55,31 @@ async function getProfile(symbol) {
   return detail;
 }
 
-module.exports = { getQuote, getProfile };
+async function getHistory(symbol) {
+  let options = { method: "GET" };
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=1d&range=3mo`;
+  let detail = {};
+
+  await fetch(url, options)
+    .then((res) => res.json())
+    .then((json) => {
+      detail = json;
+      // console.log("fetch yahoo history: ", json);
+      // if (json.quoteSummary.result !== null) {
+      //   detail = json.quoteSummary?.result[0];
+      // } else {
+      //   // TODO Handle errors
+      //   detail = {
+      //     assetProfile: { longBusinessSummary: json.quoteSummary.error.code },
+      //   };
+      // }
+      return detail;
+    })
+    .catch((err) => {
+      // TODO Handle errors
+      console.error("error:" + err);
+    });
+  return detail;
+}
+
+module.exports = { getQuote, getProfile, getHistory };

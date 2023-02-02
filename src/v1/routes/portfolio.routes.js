@@ -211,4 +211,20 @@ router.get(
   portfolioController.getQuote
 );
 
+//
+// Get the history for a symbol
+//
+router.get(
+  "/getHistory/",
+  // [authJwt.verifyToken],
+  [
+    query("symbol")
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage("Symbol cannot be blank!"),
+  ],
+  portfolioController.getHistory
+);
+
 module.exports = router;
