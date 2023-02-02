@@ -794,7 +794,11 @@ const getHistory = async (req, res) => {
         "-" +
         (date.getMonth() + 1).toString().padStart(2, "0") +
         "-" +
-        date.getDate();
+        date.getDate() +
+        "T" +
+        date.getHours() +
+        ":" +
+        date.getMinutes();
       historyChart[i] = {
         date: dateString,
         price: history.indicators.quote[0].close[i],
