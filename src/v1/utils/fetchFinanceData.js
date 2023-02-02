@@ -57,7 +57,7 @@ async function getProfile(symbol) {
 
 async function getHistory(symbol) {
   let options = { method: "GET" };
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=1d&range=1mo`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m&range=1d`;
   let detail = {};
 
   await fetch(url, options)
