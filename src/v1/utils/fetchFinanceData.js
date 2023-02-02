@@ -57,6 +57,9 @@ async function getProfile(symbol) {
 
 async function getHistory(symbol) {
   let options = { method: "GET" };
+  let startDate = new Date();
+  startDate.setHours(8);
+  startDate.setMinutes(30);
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m&range=1d`;
   let detail = {};
 

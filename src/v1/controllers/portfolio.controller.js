@@ -799,9 +799,15 @@ const getHistory = async (req, res) => {
         date.getHours() +
         ":" +
         date.getMinutes();
+
+      let price = history.indicators.quote[0].close[i];
+      if (!price) {
+        price = 0;
+      }
+
       historyChart[i] = {
         date: dateString,
-        price: history.indicators.quote[0].close[i],
+        price: price.toFixed(2),
       };
     }
 
