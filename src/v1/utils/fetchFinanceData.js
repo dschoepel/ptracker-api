@@ -57,22 +57,13 @@ async function getProfile(symbol) {
 
 async function getHistory(symbol) {
   let options = { method: "GET" };
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=1d&range=3mo`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=1d&range=1mo`;
   let detail = {};
 
   await fetch(url, options)
     .then((res) => res.json())
     .then((json) => {
       detail = json;
-      // console.log("fetch yahoo history: ", json);
-      // if (json.quoteSummary.result !== null) {
-      //   detail = json.quoteSummary?.result[0];
-      // } else {
-      //   // TODO Handle errors
-      //   detail = {
-      //     assetProfile: { longBusinessSummary: json.quoteSummary.error.code },
-      //   };
-      // }
       return detail;
     })
     .catch((err) => {
