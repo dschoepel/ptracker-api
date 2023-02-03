@@ -55,14 +55,11 @@ async function getProfile(symbol) {
   return detail;
 }
 
-async function getHistory(symbol) {
+async function getHistory(symbol, startDate, endDate) {
   let options = { method: "GET" };
-  let startDate = new Date();
-  startDate.setHours(8);
-  startDate.setMinutes(30);
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m&range=1d`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m&period1=${startDate}&period2=${endDate}`;
   let detail = {};
-
+  console.log(url);
   await fetch(url, options)
     .then((res) => res.json())
     .then((json) => {

@@ -775,8 +775,9 @@ const getHistory = async (req, res) => {
   }
 
   const symbol = req.query.symbol.toUpperCase();
+  const { startDate, endDate } = setChartDates();
   const historyDetail = await fetchFinanceData
-    .getHistory(symbol)
+    .getHistory(symbol, startDate, endDate)
     .catch((error) => {
       //TODO Handle errors
       console.log(error);
@@ -826,6 +827,55 @@ const getHistory = async (req, res) => {
     });
   }
 };
+
+function setChartDates() {
+  // Assume this system is running in GMT
+  const START_HR = 8; // 9:00am EST
+  const START_MIN = 29;
+  const END_HR = 15; // 4:00 pm EST
+  const END_MIN = 1;
+  let startDate = new Date();
+  startDate.setHours(START_HR);
+  startDate.setMinutes(START_MIN);
+  let startTime = startDate.getTime();
+  let endDate = new Date();
+  endDate.setHours(END_HR);
+  endDate.setMinutes(END_MIN);
+  let endTime = endDate.getTime();
+  const now = new Date();
+  const nowTime = now.getTime();
+  const nowDayNbr = now.getDay();
+  const nowHr = now.getHours();
+  let dateRange = { startDate: startDate, endDate: endDate };
+
+  // If current time is before next market opening @9:00am EST use yesterdays date range
+  // TODO weekends ?
+  const weekday = nowDayNbr > 0 && nowDayNbr <= 5 ? true : false;
+  const tradingHrs = nowTime >= startTime && nowTime <= endTime ? true : false;
+  console.log("weekday", nowDayNbr, weekday ? "true" : "false");
+  console.log("tradingHrs", nowTime, tradingHrs ? "true" : "false");
+
+  // Use previous trading day if not a weekday or is a weekday and time is before trading starts
+  if (!weekday) {
+    dateRange = adjustDates(startDate, endDate, nowDayNbr);
+  } else {
+    if (!tradingHrs && nowTime < startTime) {
+      dateRange = adjustDates(startDate, endDate, nowDayNbr);
+    }
+  }
+  // Return EPOC time stamps
+  return {
+    startDate: Math.floor(dateRange.startDate.getTime() / 1000.0),
+    endDate: Math.floor(dateRange.endDate.getTime() / 1000.0),
+  };
+}
+
+function adjustDates(startDate, endDate, nowDayNbr) {
+  const dayAdjustment = nowDayNbr > 1 ? 1 : nowDayNbr + 2;
+  startDate.setDate(startDate.getDate() - dayAdjustment);
+  endDate.setDate(endDate.getDate() - dayAdjustment);
+  return { startDate: startDate, endDate: endDate };
+}
 
 module.exports = {
   addPortfolio,
