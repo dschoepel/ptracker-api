@@ -830,10 +830,10 @@ const getHistory = async (req, res) => {
 
 function setChartDates() {
   // Assume this system is running in GMT
-  const START_HR = 8; // 9:00am EST
-  const START_MIN = 29;
-  const END_HR = 15; // 4:00 pm EST
-  const END_MIN = 1;
+  const START_HR = 0; // 00:00am EST
+  const START_MIN = 00;
+  const END_HR = 23; // 11:59 pm EST
+  const END_MIN = 59;
   let startDate = new Date();
   startDate.setHours(START_HR);
   startDate.setMinutes(START_MIN);
