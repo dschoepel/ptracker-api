@@ -800,7 +800,7 @@ const getHistory = async (req, res) => {
         date.getHours() +
         ":" +
         date.getMinutes();
-
+      // console.log("Index-date: ", i, dateString);
       let price = history.indicators.quote[0].close[i];
       if (!price) {
         price = 0;
@@ -808,10 +808,10 @@ const getHistory = async (req, res) => {
 
       historyChart[i] = {
         date: dateString,
-        price: price.toFixed(2),
+        price: Number(price.toFixed(2)),
       };
     }
-
+    console.log("historyChart: ", historyChart);
     return res.status(200).send({
       message: `History for ${symbol} was successful!`,
       success: true,
