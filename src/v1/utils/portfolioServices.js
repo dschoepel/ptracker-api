@@ -315,6 +315,46 @@ const addLot = async (lotKeys, lotDetail) => {
 
   // Add the new lot
   newLot = await Lot.create(lot);
+  console.log("Added lot: ", newLot);
+
+  // await Lot.findOne({ _id: newLot._id })
+  //   .populate("userId", "username")
+  //   .populate({
+  //     path: "portfolioId",
+  //   })
+  //   .populate("assetId")
+  //   .exec((err, lot) => {
+  //     console.log("Populated lot record error: ", lot, err);
+  //   });
+
+  // Add lot id to portfolio
+  if (newLot) {
+    const portfolioDetail = await Portfolio.findOne({ _id: portfolioId }).catch(
+      (error) => {
+        //TODO Handle errors
+        console.log(error);
+      }
+    );
+    if (!portfolioDetail) {
+      //TODO Handle Errors
+    } else {
+      let updatedLots = portfolioDetail.lots;
+      console.log(
+        "Port lots before adding new one... ",
+        updatedLots,
+        updatedLots.length
+      );
+      updatedLots.push(newLot._id);
+
+      // Save udpated lot info to portfolio
+      console.log("Updated lotId array", updatedLots, updatedLots.length);
+      portfolioDetail.lots = updatedLots;
+      await portfolioDetail.save().catch((error) => {
+        //TODO Handle system error
+        console.log("Error updating portfolio:", error);
+      });
+    }
+  }
 
   await Lot.findOne({ _id: newLot._id })
     .populate("userId", "username")

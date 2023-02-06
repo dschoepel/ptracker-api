@@ -23,6 +23,12 @@ const Portfolio = mongoose.model(
           ref: "Asset",
         },
       ],
+      lots: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Lot",
+        },
+      ],
     },
     {
       timestamps: true,

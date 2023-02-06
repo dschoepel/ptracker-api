@@ -3,7 +3,8 @@ const { validationResult } = require("express-validator");
 const ps = require("../utils/portfolioServices");
 const fetchFinanceData = require("../utils/fetchFinanceData");
 const { Types } = require("mongoose");
-const { asset } = require("../models");
+const { asset, mongoose } = require("../models");
+const { json } = require("body-parser");
 
 const { portfolio: Portfolio, user: User, asset: Asset, lot: Lot } = db;
 
@@ -278,10 +279,11 @@ const addPortfolioAsset = async (req, res, next) => {
         errorFlag: true,
       });
     }
-
+    console.log("Current Portfolio Assets: ", currentPortfolio);
     // Asset is not already in portfolio, add it to the portfolio
     if (!currentPortfolio.assets.includes(response.asset._id)) {
       currentPortfolio.assets.push(response.asset._id);
+      currentPortfolio.assets.lots = [];
 
       await currentPortfolio.save().catch((error) => {
         return res.status(500).send({
@@ -388,8 +390,15 @@ const getOnePortfolio = async (req, res, next) => {
   const portfolioId = req.params.portfolioId;
 
   const portfolioDetail = await Portfolio.findOne({ _id: portfolioId })
-    .populate("assets")
+    .populate({
+      path: "assets",
+      options: { sort: { assetSymbol: 1 } },
+    })
     .populate("userId", "username")
+    .populate({
+      path: "lots",
+      options: { sort: { lotAssetSymbol: 1, lotAcquiredDate: -1 } },
+    })
     .then((portfolio) => {
       return portfolio;
     })
@@ -403,8 +412,39 @@ const getOnePortfolio = async (req, res, next) => {
       });
     });
 
+  // Summarize asset values and quanties
+  let portfolioBasisCost = 0;
+  let portfolioAssetSummary = [];
+  if (portfolioDetail) {
+    portfolioDetail.assets.forEach((asset) => {
+      let lotBasisTotal = 0;
+      let lotQtyTotal = 0;
+      let nbrOfLots = 0;
+
+      portfolioDetail.lots.forEach((lot) => {
+        if (asset.assetSymbol === lot.lotAssetSymbol) {
+          lotBasisTotal += lot.lotCostBasis;
+          lotQtyTotal += lot.lotQty;
+          nbrOfLots = ++nbrOfLots;
+        }
+      });
+      portfolioAssetSummary.push({
+        assetId: asset._id,
+        assetSymbol: asset.assetSymbol,
+        nbrOfLots: nbrOfLots,
+        assetBasisTotal: lotBasisTotal,
+        assetQtyTotal: lotQtyTotal,
+      });
+      portfolioBasisCost += lotBasisTotal;
+    });
+
+    // Build asset table structure for ant design
+  }
+
   res.status(200).send({
     portfolioDetail: portfolioDetail,
+    portfolioAssetSummary: portfolioAssetSummary,
+    portfolioBasisCost: portfolioBasisCost,
     message: `The Portfolio called "${portfolioDetail.portfolioName}" was retrieved for "${portfolioDetail.userId.username}"!`,
     successFlag: "OK",
     success: true,
@@ -413,7 +453,7 @@ const getOnePortfolio = async (req, res, next) => {
 };
 
 //
-// Get a specific PORTFOLIO
+// Get all of users PORTFOLIOs
 //
 const getUserPortfolios = async (req, res, next) => {
   const errors = validationResult(req);
@@ -496,6 +536,49 @@ const getLotsByPortfolio = async (req, res, next) => {
 };
 
 //
+// Get Users Portfolio Detail - params = userId, portfolioId
+//
+const getPortfolioDetail = async (req, res, next) => {
+  const { userId } = req;
+  const { portfolioId } = req.body;
+
+  //Retrieve a users Portfolio, with assets (asscending order by symbol) and lot (descending order by date acquired)
+  const portfolioDetail = await Portfolio.find({
+    _id: portfolioId,
+    userId: userId,
+  })
+    .populate({
+      path: "assets",
+    })
+    .sort({ assetSymbol: 1 })
+    .populate({
+      path: "lots",
+      match: { portfolioId: _id },
+    })
+    .sort({ lotAcquiredDate: -1 })
+    .then((portfolios) => {
+      return portfolios;
+    })
+    .catch((error) => {
+      res.status(204).send({
+        portfolioDetails: [],
+        message: `Error: There were no records retrieved for ${userId}!  Additional error details: ${error}`,
+        successFlag: "NOT-FOUND",
+        success: false,
+        errorFlag: true,
+      });
+    });
+
+  res.status(200).send({
+    portfolioDetail: portfolioDetail,
+    message: `There were ${portfolioDetail.length} records retrieved for ${userId}!`,
+    successFlag: "OK",
+    success: true,
+    errorFlag: false,
+  });
+};
+
+//
 // ADD an ASSET to the global list of assets used to build portfolio's
 //
 const addAsset = async (req, res, next) => {
@@ -554,6 +637,8 @@ const addLot = async (req, res) => {
     assetId: assetId,
     lotAssetSymbol: assetSymbol,
   };
+
+  // Get portfolio details to update with added lots...
 
   // Add lot(s) from the array (lots) that holds objects {qty, acquiredDate, unitPrice}
   // A portfolio can be created with no assets
@@ -800,7 +885,6 @@ const getHistory = async (req, res) => {
         date.getHours() +
         ":" +
         date.getMinutes();
-      // console.log("Index-date: ", i, dateString);
       let price = history.indicators.quote[0].close[i];
       if (!price) {
         price = 0;
@@ -811,7 +895,7 @@ const getHistory = async (req, res) => {
         price: Number(price.toFixed(2)),
       };
     }
-    console.log("historyChart: ", historyChart);
+
     return res.status(200).send({
       message: `History for ${symbol} was successful!`,
       success: true,
@@ -885,6 +969,7 @@ module.exports = {
   removePortfolioAsset,
   getOnePortfolio,
   getUserPortfolios,
+  getPortfolioDetail,
   getLotsByPortfolio,
   addAsset,
   addLot,
