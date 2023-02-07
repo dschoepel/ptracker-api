@@ -915,10 +915,10 @@ const getHistory = async (req, res) => {
 
 function setChartDates() {
   // Assume this system is running in GMT
-  const START_HR = 00; // 00:00am EST
-  const START_MIN = 01;
-  const END_HR = 23; // 11:59 pm EST
-  const END_MIN = 59;
+  const START_HR = 08; // 00:00am EST
+  const START_MIN = 30;
+  const END_HR = 15; // 11:59 pm EST
+  const END_MIN = 00;
   const LOCAL_OFFSET_MILLIS = new Date().getTimezoneOffset() * (1000 * 60);
   let startDate = new Date();
   console.log(
@@ -932,15 +932,19 @@ function setChartDates() {
     startDate.getTime() - LOCAL_OFFSET_MILLIS
   );
   // startDate.setMinutes(START_MIN);
-  console.log("Start date: ", startDate.getTime());
-  let startTime = startDate.getTime();
+  // let startTime = startDate.getTime();
+  let startTime = new Date(startDate).getTime();
+  console.log("Start date: ", startTime);
   let endDate = new Date();
   endDate.setHours(END_HR);
   endDate.setMinutes(END_MIN);
-  console.log("End date: ", endDate.getTime());
-  let endTime = endDate.getTime();
+  // let endTime = endDate.getTime();
+  let endTime = new Date(endDate).getTime();
+  console.log("End date: ", endTime);
   const now = new Date();
-  const nowTime = now.getTime();
+  // const nowTime = now.getTime();
+  const nowTime = new Date(now).getTime();
+  console.log("Now Time: ", nowTime);
   const nowDayNbr = now.getDay();
   const nowHr = now.getHours();
   let dateRange = { startDate: startDate, endDate: endDate };
@@ -948,7 +952,7 @@ function setChartDates() {
   // If current time is before next market opening @9:00am EST use yesterdays date range
   // TODO weekends ?
   const test =
-    nowTime >= startDate.getTime() && nowTime <= endDate.getTime()
+    nowTime >= startTime && nowTime <= endTime
       ? "is in trading hours"
       : "is NOT in trading hours";
   console.log(test, nowHr);
