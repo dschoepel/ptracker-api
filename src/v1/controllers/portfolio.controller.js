@@ -921,10 +921,12 @@ function setChartDates() {
   let startDate = new Date();
   startDate.setHours(START_HR);
   startDate.setMinutes(START_MIN);
+  console.log("Start date: ", startDate);
   let startTime = startDate.getTime();
   let endDate = new Date();
   endDate.setHours(END_HR);
   endDate.setMinutes(END_MIN);
+  console.log("End date: ", endDate);
   let endTime = endDate.getTime();
   const now = new Date();
   const nowTime = now.getTime();
