@@ -914,19 +914,21 @@ const getHistory = async (req, res) => {
 
 function setChartDates() {
   // Assume this system is running in GMT
-  const START_HR = 0; // 00:00am EST
-  const START_MIN = 00;
+  const START_HR = 00; // 00:00am EST
+  const START_MIN = 01;
   const END_HR = 23; // 11:59 pm EST
   const END_MIN = 59;
   let startDate = new Date();
-  startDate.setHours(START_HR);
-  startDate.setMinutes(START_MIN);
-  console.log("Start date: ", startDate);
+  console.log("Start DAte initialized: ", startDate.getTime());
+  startDate.setHours(START_HR, START_MIN, 00);
+  console.log("after set hour to 00: ", startDate.getTime());
+  // startDate.setMinutes(START_MIN);
+  console.log("Start date: ", startDate.getTime());
   let startTime = startDate.getTime();
   let endDate = new Date();
   endDate.setHours(END_HR);
   endDate.setMinutes(END_MIN);
-  console.log("End date: ", endDate);
+  console.log("End date: ", endDate.getTime());
   let endTime = endDate.getTime();
   const now = new Date();
   const nowTime = now.getTime();
@@ -936,6 +938,11 @@ function setChartDates() {
 
   // If current time is before next market opening @9:00am EST use yesterdays date range
   // TODO weekends ?
+  const test =
+    nowTime >= startDate.getTime() && nowTime <= endDate.getTime()
+      ? "is in trading hours"
+      : "is NOT in trading hours";
+  console.log(test, nowHr);
   const weekday = nowDayNbr > 0 && nowDayNbr <= 5 ? true : false;
   const tradingHrs = nowTime >= startTime && nowTime <= endTime ? true : false;
   console.log("start: ", startTime, "end: ", endTime);
