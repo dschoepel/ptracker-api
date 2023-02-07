@@ -936,6 +936,7 @@ function setChartDates() {
   // TODO weekends ?
   const weekday = nowDayNbr > 0 && nowDayNbr <= 5 ? true : false;
   const tradingHrs = nowTime >= startTime && nowTime <= endTime ? true : false;
+  console.log("start: ", startTime, "end: ", endTime);
   console.log("weekday", nowDayNbr, weekday ? "true" : "false");
   console.log("tradingHrs", nowTime, tradingHrs ? "true" : "false");
 
