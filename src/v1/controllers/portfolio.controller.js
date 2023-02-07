@@ -871,6 +871,7 @@ const getHistory = async (req, res) => {
   if (!historyDetail) {
     //TODO Handle errors
   } else {
+    console.log("history detail: ", historyDetail);
     const history = historyDetail.chart.result[0];
     let historyChart = [];
     for (let i = 0; i < history.timestamp.length; ++i) {
@@ -918,10 +919,18 @@ function setChartDates() {
   const START_MIN = 01;
   const END_HR = 23; // 11:59 pm EST
   const END_MIN = 59;
+  const LOCAL_OFFSET_MILLIS = new Date().getTimezoneOffset() * (1000 * 60);
   let startDate = new Date();
-  console.log("Start DAte initialized: ", startDate.getTime());
+  console.log(
+    "Start DAte initialized: ",
+    startDate.getTime(),
+    LOCAL_OFFSET_MILLIS
+  );
   startDate.setHours(START_HR, START_MIN, 00);
-  console.log("after set hour to 00: ", startDate.getTime());
+  console.log(
+    "after set hour to 00: ",
+    startDate.getTime() - LOCAL_OFFSET_MILLIS
+  );
   // startDate.setMinutes(START_MIN);
   console.log("Start date: ", startDate.getTime());
   let startTime = startDate.getTime();
