@@ -762,6 +762,7 @@ const updateLot = async (req, res) => {
 
 // *****
 // DELETE a Lot from an asset using the lot Id
+// Remove from portfolio as well
 // *****
 const deleteLot = async (req, res) => {
   const errors = validationResult(req);
@@ -788,6 +789,32 @@ const deleteLot = async (req, res) => {
       });
     }
   );
+
+  if (deletedLot) {
+    const portfolioDetail = await Portfolio.findOne({
+      _id: deletedLot.portfolioId,
+    }).catch((error) => {
+      return res.status(500).send({
+        message: error,
+        statusFlag: "ERROR_PORTFOLIO_LOT_DELETE",
+        success: false,
+        errorFlag: true,
+      });
+    });
+
+    if (portfolioDetail) {
+      const { lots } = portfolioDetail;
+      const index = lots.indexOf(deletedLot._id);
+      console.log("index of lot", index, deleteLot._id);
+      // lots.splice(index, 1);
+      const updatedLots = lots.filter((lot) => lot._id !== deletedLot._id);
+      portfolioDetail.lots = updatedLots;
+      await portfolioDetail.save().catch((error) => {
+        //TODO Handle system error
+        console.log("Error updating portfolio:", error);
+      });
+    }
+  }
 
   if (!deletedLot) {
     return res.status(400).send({
