@@ -470,6 +470,7 @@ const getUserPortfolios = async (req, res, next) => {
   const portfolioDetailArray = await Portfolio.find({ userId: userId })
     .populate("assets")
     .populate("userId", "username")
+    .sort({ portfolioName: 1 })
     .then((portfolioArray) => {
       return portfolioArray;
     })
