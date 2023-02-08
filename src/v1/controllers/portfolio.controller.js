@@ -804,14 +804,22 @@ const deleteLot = async (req, res) => {
 
     if (portfolioDetail) {
       const { lots } = portfolioDetail;
-      const index = lots.indexOf(deletedLot._id);
-      console.log("index of lot", index, deleteLot._id);
+      // const index = lots.indexOf(deletedLot._id);
+      // console.log("index of lot", index, deletedLot._id);
       // lots.splice(index, 1);
-      const updatedLots = lots.filter((lot) => lot._id !== deletedLot._id);
+      const updatedLots = lots.filter((lot) => {
+        // console.log(
+        //   "to Delete lots deletedLot",
+        //   lot._id.toString(),
+        //   deletedLot._id.toString()
+        // );
+
+        return lot._id.toString() !== deletedLot._id.toString();
+      });
       portfolioDetail.lots = updatedLots;
       await portfolioDetail.save().catch((error) => {
         //TODO Handle system error
-        console.log("Error updating portfolio:", error);
+        console.log("Error removing lot from portfolio:", error);
       });
     }
   }
