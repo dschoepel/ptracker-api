@@ -212,6 +212,22 @@ router.get(
 );
 
 //
+// Get a quote for a symbol
+//
+router.get(
+  "/getQuotes/",
+  [authJwt.verifyToken],
+  [
+    query("searchText")
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage("Search value cannot be blank!"),
+  ],
+  portfolioController.getQuotes
+);
+
+//
 // Get the history for a symbol
 //
 router.get(

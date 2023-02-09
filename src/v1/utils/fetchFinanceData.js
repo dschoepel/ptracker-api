@@ -28,6 +28,34 @@ async function getQuote(symbol) {
   return detail;
 }
 
+// Get symbol details from Yahoo finance API
+async function getQuotes(searchText) {
+  let options = { method: "GET" };
+  // const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+  const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${searchText}`;
+  let quotes = [];
+
+  await fetch(url, options)
+    .then((res) => res.json())
+    .then((json) => {
+      console.log("Search returned: ", json.quotes);
+      quotes = json.quotes;
+      if (quotes.length <= 0) {
+        // TODO handle errors here
+        console.log("Symbol search Fetch error - result missing", json);
+      } else {
+        // Found symbol
+        return quotes;
+      }
+    })
+    .catch((err) => {
+      // TODO handle errors
+      console.error("error:" + err);
+    });
+  // console.log("fetch quote detail: ", detail);
+  return quotes;
+}
+
 //Fetch company profile data from Yahoo finance
 async function getProfile(symbol) {
   let options = { method: "GET" };
@@ -73,4 +101,4 @@ async function getHistory(symbol, startDate, endDate) {
   return detail;
 }
 
-module.exports = { getQuote, getProfile, getHistory };
+module.exports = { getQuote, getQuotes, getProfile, getHistory };

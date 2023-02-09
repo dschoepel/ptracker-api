@@ -882,6 +882,41 @@ const getQuote = async (req, res) => {
 };
 
 // *****
+// Get a list of quotes from the Financial Api matching search text (symbol or company name)
+// *****
+const getQuotes = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+
+  const search = req.query.searchText;
+  const searchResult = await fetchFinanceData
+    .getQuotes(search)
+    .catch((error) => {
+      //TODO Handle errors
+      console.log(error);
+    });
+
+  if (searchResult.length <= 0) {
+    //TODO Handle errors
+  } else {
+    return res.status(200).send({
+      message: `Retrieve quote list for ${search} was successful!`,
+      success: true,
+      errorFlag: false,
+      errorStatus: "OK",
+      searchResult: searchResult,
+    });
+  }
+};
+
+// *****
 // Get the history for a symbol from the Financial Api
 // *****
 const getHistory = async (req, res) => {
@@ -1035,5 +1070,6 @@ module.exports = {
   updateLot,
   deleteLot,
   getQuote,
+  getQuotes,
   getHistory,
 };
