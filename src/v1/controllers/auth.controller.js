@@ -47,7 +47,7 @@ exports.signup = async (req, res, next) => {
   } else {
     defaultImage = "";
   }
-
+  console.log("default image name is ===> ", defaultImage);
   const profileImg = req.body.profileImage
     ? req.body.profileImage
     : defaultImage;
