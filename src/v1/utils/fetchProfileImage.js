@@ -13,8 +13,8 @@ async function getDefaultImage(userName, userId) {
   return await download
     .image(options)
     .then(({ filename }) => {
-      const start = filename.indexOf("/");
-      const name = filename.substring(start + 1);
+      const start = filename.indexOf("images/");
+      const name = filename.substring(start + 6);
       const result = { ok: true, filename: name };
       return result;
     })
