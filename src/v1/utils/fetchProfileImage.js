@@ -6,7 +6,8 @@ async function getDefaultImage(userName, userId) {
 
   let options = {
     url: `https://ui-avatars.com/api/?name=${userName}&bold=true&background=524656&color=f3f4f6`,
-    dest: `${dest}/${userId}_${userName}.png`,
+    // dest: `${dest}/${userId}_${userName}.png`,
+    dest: `${userId}_${userName}.png`,
   };
 
   return await download
