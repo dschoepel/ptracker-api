@@ -38,7 +38,6 @@ async function getQuotes(searchText) {
   await fetch(url, options)
     .then((res) => res.json())
     .then((json) => {
-      console.log("Search returned: ", json.quotes);
       quotes = json.quotes;
       if (quotes.length <= 0) {
         // TODO handle errors here
