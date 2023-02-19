@@ -14,7 +14,7 @@ async function getDefaultImage(userName, userId) {
     .image(options)
     .then(({ filename }) => {
       const start = filename.indexOf("images/");
-      const name = filename.substring(start + 6);
+      const name = filename.substring(start + 7);
       const result = { ok: true, filename: name };
       return result;
     })
