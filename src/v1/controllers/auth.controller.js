@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { validationResult } = require("express-validator");
 const uploadFile = require("../middleware/upload");
+const Avatars = require("../utils/fetchProfileImage");
 const config = require("../config/auth.config");
 const sendEmail = require("../utils/email/sendEmail");
 const sendVerificationEmail = require("../utils/email/sendVerificationEmail");
@@ -22,7 +23,7 @@ var crypto = require("crypto");
 // const { use } = require("../routes/auth.routes");
 
 // Signup user, /middleware/verifySignup has verified that new user can be added
-exports.signup = (req, res, next) => {
+exports.signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).send({
@@ -32,9 +33,24 @@ exports.signup = (req, res, next) => {
       errorFlag: true,
     });
   }
+
+  const tempImage = await Avatars.getDefaultImage(
+    req.body.username,
+    "default_image_for"
+  ).catch((err) => {
+    console.log("Error getting default avatar: ", err);
+  });
+
+  let defaultImage = "";
+  if (tempImage.ok) {
+    defaultImage = tempImage.filename;
+  } else {
+    defaultImage = "";
+  }
+
   const profileImg = req.body.profileImage
     ? req.body.profileImage
-    : "defaultperson.png";
+    : defaultImage;
   const user = new User({
     username: req.body.username,
     email: req.body.email,
