@@ -61,6 +61,7 @@ const addPortfolio = async (req, res, next) => {
   });
   return res.status(201).send({
     message: `Portfolio added for userId: ${newPortfolio.userId}, called: ${newPortfolio.portfolioName}, described as: ${newPortfolio.portfolioDescription}, with this list of assets: ${newPortfolio.assetIds}.`,
+    portfolioId: newPortfolio._id,
     success: true,
     errorFlag: false,
     errorStatus: "",
