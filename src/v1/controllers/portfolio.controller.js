@@ -542,7 +542,7 @@ const getUserNetWorth = async (req, res, next) => {
 
       // Process each asset
       if (assets.length > 0) {
-        let asseNetWorth = 0;
+        let assetNetWorth = 0;
         let assetDaysChange = 0;
         let assetTotalBookValue = 0;
         let assetTotalReturn = 0;
@@ -599,7 +599,7 @@ const getUserNetWorth = async (req, res, next) => {
           for (let lotIndex = 0; lotIndex < filteredLots.length; lotIndex++) {
             // NetWorth accumulators
             lotNetWorth = filteredLots[lotIndex].lotQty * quote.delayedPrice;
-            asseNetWorth += lotNetWorth;
+            assetNetWorth += lotNetWorth;
             portfolioNetWorth += lotNetWorth;
             userNetWorth += lotNetWorth;
             //DaysChange accumulators
@@ -667,7 +667,7 @@ const getUserNetWorth = async (req, res, next) => {
           AssetExchange: AssetExchange,
           assetDisplayName: assetDisplayName,
           assetCurrency: assetCurrency,
-          asseNetWorth: asseNetWorth,
+          assetNetWorth: assetNetWorth,
           assetDaysChange: assetDaysChange,
           assetTotalBookValue: assetTotalBookValue,
           assetTotalReturn: assetTotalReturn,
@@ -678,7 +678,12 @@ const getUserNetWorth = async (req, res, next) => {
           assetLongBusinessSummary: assetLongBusinessSummary,
           lots: lotSummaries,
         });
+        //Reset Asset accumulators
       } // End - If asset.length > 0
+      assetNetWorth = 0;
+      assetDaysChange = 0;
+      assetTotalBookValue = 0;
+      assetTotalReturn = 0;
     } // End - For each Asset
 
     // Destructure portfolio record properties
