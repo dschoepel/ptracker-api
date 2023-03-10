@@ -506,12 +506,6 @@ const getUserNetWorth = async (req, res, next) => {
     let portfolioTotalReturn = 0;
     assetSummaries = [];
     // Get Portfolio detail (asset and lot details)
-    console.log(
-      "portfolioDetailArray length: ",
-      portfolioDetailArray[i].portfolioName,
-      portfolioDetailArray.length,
-      i
-    );
     const portfolioId = portfolioDetailArray[i]._id;
     const portfolioDetail = await Portfolio.findOne({ _id: portfolioId })
       .populate({
