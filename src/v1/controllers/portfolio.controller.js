@@ -592,16 +592,18 @@ const getUserNetWorth = async (req, res, next) => {
           (lot) => lot.lotAssetSymbol === quote.symbol
         );
 
+        //TODO fix calcs  lot resets total every loop of lot, add lot to asset before
+        // next asset.  Add asset to portfolio before next portfolio and add portfolio to user at same time..
+
         if (filteredLots.length > 0) {
           for (let lotIndex = 0; lotIndex < filteredLots.length; lotIndex++) {
             // NetWorth accumulators
-            lotNetWorth += filteredLots[lotIndex].lotQty * quote.delayedPrice;
+            lotNetWorth = filteredLots[lotIndex].lotQty * quote.delayedPrice;
             asseNetWorth += lotNetWorth;
             portfolioNetWorth += lotNetWorth;
             userNetWorth += lotNetWorth;
             //DaysChange accumulators
-            lotDaysChange +=
-              filteredLots[lotIndex].lotQty * quote.delayedChange;
+            lotDaysChange = filteredLots[lotIndex].lotQty * quote.delayedChange;
             assetDaysChange += lotDaysChange;
             portfolioDaysChange += lotDaysChange;
             userDaysChange += lotDaysChange;
@@ -610,7 +612,7 @@ const getUserNetWorth = async (req, res, next) => {
             portfolioTotalBookValue += filteredLots[lotIndex].lotCostBasis;
             userTotalBookValue += filteredLots[lotIndex].lotCostBasis;
             //TotalReturn accumulators
-            lotTotalReturn += lotNetWorth - filteredLots[lotIndex].lotCostBasis;
+            lotTotalReturn = lotNetWorth - filteredLots[lotIndex].lotCostBasis;
             assetTotalReturn += lotTotalReturn;
             portfolioTotalReturn += lotTotalReturn;
             userTotalReturn += lotTotalReturn;
@@ -643,7 +645,7 @@ const getUserNetWorth = async (req, res, next) => {
               lotUnitPrice: lotUnitPrice,
               lotCostBasis: lotCostBasis,
             });
-          }
+          } //End - For each lot
         }
         // Destructure asset record properties
         const {
