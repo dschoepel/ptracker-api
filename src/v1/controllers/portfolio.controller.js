@@ -3,7 +3,7 @@ const { validationResult } = require("express-validator");
 const ps = require("../utils/portfolioServices");
 const fetchFinanceData = require("../utils/fetchFinanceData");
 const { Types } = require("mongoose");
-const { asset, mongoose } = require("../models");
+const { asset, mongoose, lot } = require("../models");
 const { json } = require("body-parser");
 
 const { portfolio: Portfolio, user: User, asset: Asset, lot: Lot } = db;
@@ -450,6 +450,278 @@ const getOnePortfolio = async (req, res, next) => {
     successFlag: "OK",
     success: true,
     errorFlag: false,
+  });
+};
+
+//
+// Get User Total NetWorth by Portfolio
+//TODO this uses redundand queries - refactor them to portfolio services portfolio detail
+// array, portfolioDetail,
+//
+const getUserNetWorth = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+  const { userId } = req;
+  let netWorthDetails = {}; // Return summary and details of one user's Portfolios
+  let userNetWorth = 0;
+  let userDaysChange = 0;
+  let userTotalBookValue = 0;
+  let userTotalReturn = 0;
+  // let userAssetSummary = [];
+  let portfolioSummaries = [];
+  let assetPriceTable = [{}];
+  let assetSummaries = [{}];
+  let lotSummaries = [{}];
+
+  // Get portfolios associated with the userId
+  const portfolioDetailArray = await Portfolio.find({ userId: userId })
+    .populate("assets")
+    .populate("userId", "username")
+    .sort({ portfolioName: 1 })
+    .then((portfolioArray) => {
+      return portfolioArray;
+    })
+    .catch((error) => {
+      res.status(204).send({
+        message: `Error: There were no records retrieved for ${userId}!  Additional error details: ${error}`,
+        successFlag: "NOT-FOUND",
+        success: false,
+        errorFlag: true,
+        portfolioDetailArray: [],
+      });
+    });
+
+  // For each portfolio, calculate asset value and lot values
+  for (let i = 0; i < portfolioDetailArray.length; i++) {
+    let portfolioNetWorth = 0;
+    let portfolioDaysChange = 0;
+    let portfolioTotalBookValue = 0;
+    let portfolioTotalReturn = 0;
+    assetSummaries = [];
+    // Get Portfolio detail (asset and lot details)
+    console.log(
+      "portfolioDetailArray length: ",
+      portfolioDetailArray[i].portfolioName,
+      portfolioDetailArray.length,
+      i
+    );
+    const portfolioId = portfolioDetailArray[i]._id;
+    const portfolioDetail = await Portfolio.findOne({ _id: portfolioId })
+      .populate({
+        path: "assets",
+        options: { sort: { assetSymbol: 1 } },
+      })
+      .populate("userId", "username")
+      .populate({
+        path: "lots",
+        options: { sort: { lotAssetSymbol: 1, lotAcquiredDate: -1 } },
+      })
+      .then((portfolio) => {
+        return portfolio;
+      })
+      .catch((error) => {
+        res.status(204).send({
+          portfolioDetails: [],
+          message: `Error: There were no records retrieved for ${userId}!  Additional error details: ${error}`,
+          successFlag: "NOT-FOUND",
+          success: false,
+          errorFlag: true,
+        });
+      });
+
+    // Process each portfolio
+    for (
+      let assetIndex = 0;
+      assetIndex < portfolioDetail.assets.length;
+      assetIndex++
+    ) {
+      // Process each asset and save summary in array called assetSummaries
+      const { assets, lots, portfolioName, portfolioDescription } =
+        portfolioDetail;
+
+      // Process each asset
+      if (assets.length > 0) {
+        let asseNetWorth = 0;
+        let assetDaysChange = 0;
+        let assetTotalBookValue = 0;
+        let assetTotalReturn = 0;
+        // Get quote for this asset
+        let quote = 0;
+        let symbol = assets[assetIndex].assetSymbol;
+        // Only get the quote if it has not already been retrieved, save quotes in array
+        let index = assetPriceTable.findIndex(
+          (asset) => asset.symbol === symbol
+        );
+
+        if (index > 0) {
+          // Found price detail in table, no need to fetch again, ensures same asset
+          // price is used across portfolios
+          quote = {
+            symbol: assetPriceTable[index].symbol,
+            delayedPrice: assetPriceTable[index].delayedPrice,
+            delayedChange: assetPriceTable[index].delayedChange,
+          };
+        } else {
+          const quoteDetail = await fetchFinanceData
+            .getQuote(symbol)
+            .catch((error) => {
+              //TODO Handle errors
+              console.log(error);
+            });
+          // TODO Assumes quote is in first array position, should look it up...
+
+          quote = quoteDetail
+            ? quoteDetail[0]
+            : { delayedPrice: 0, delayedChange: 0 };
+          quote = {
+            symbol: quote.symbol,
+            delayedPrice: quote.regularMarketPrice,
+            delayedChange: quote.regularMarketChange,
+          };
+          assetPriceTable.push({ ...quote });
+        }
+
+        // Process lots for this asset...
+
+        lotNetWorth = 0;
+        lotDaysChange = 0;
+        lotTotalReturn = 0;
+        lotSummaries = [];
+        const filteredLots = lots.filter(
+          (lot) => lot.lotAssetSymbol === quote.symbol
+        );
+
+        if (filteredLots.length > 0) {
+          for (let lotIndex = 0; lotIndex < filteredLots.length; lotIndex++) {
+            // NetWorth accumulators
+            lotNetWorth += filteredLots[lotIndex].lotQty * quote.delayedPrice;
+            asseNetWorth += lotNetWorth;
+            portfolioNetWorth += lotNetWorth;
+            userNetWorth += lotNetWorth;
+            //DaysChange accumulators
+            lotDaysChange +=
+              filteredLots[lotIndex].lotQty * quote.delayedChange;
+            assetDaysChange += lotDaysChange;
+            portfolioDaysChange += lotDaysChange;
+            userDaysChange += lotDaysChange;
+            //TotalBookValue accumulators
+            assetTotalBookValue += filteredLots[lotIndex].lotCostBasis;
+            portfolioTotalBookValue += filteredLots[lotIndex].lotCostBasis;
+            userTotalBookValue += filteredLots[lotIndex].lotCostBasis;
+            //TotalReturn accumulators
+            lotTotalReturn += lotNetWorth - filteredLots[lotIndex].lotCostBasis;
+            assetTotalReturn += lotTotalReturn;
+            portfolioTotalReturn += lotTotalReturn;
+            userTotalReturn += lotTotalReturn;
+
+            // Destructure lot record properties
+            const {
+              _id: lotId,
+              userId,
+              portfolioId,
+              lotPortfolioName,
+              assetId,
+              lotSortIndex,
+              lotQty,
+              lotUnitPrice,
+              lotCostBasis,
+              lotAcquiredDate,
+              lotAssetSymbol,
+            } = filteredLots[lotIndex]._doc;
+            // Add summary object to lot summary for this lot
+            lotSummaries.push({
+              lotPortfolioName: lotPortfolioName,
+              lotAssetSymbol: lotAssetSymbol,
+              lotNetWorth: lotNetWorth,
+              lotDaysChange: lotDaysChange,
+              lotTotalReturn: lotTotalReturn,
+              delayedPrice: quote.delayedPrice,
+              delayedChange: quote.delayedChange,
+              lotId: lotId,
+              lotQty: lotQty,
+              lotUnitPrice: lotUnitPrice,
+              lotCostBasis: lotCostBasis,
+            });
+          }
+        }
+        // Destructure asset record properties
+        const {
+          _id: assetId,
+          assetSymbol,
+          assetType,
+          AssetExchange,
+          assetShortName,
+          assetLongName,
+          assetDisplayName,
+          assetCurrency,
+          assetLongBusinessSummary,
+        } = assets[assetIndex]._doc;
+        // Add summary object for this asset
+        assetSummaries.push({
+          assetId: assetId,
+          assetSymbol: assetSymbol,
+          assetType: assetType,
+          AssetExchange: AssetExchange,
+          assetDisplayName: assetDisplayName,
+          assetCurrency: assetCurrency,
+          asseNetWorth: asseNetWorth,
+          assetDaysChange: assetDaysChange,
+          assetTotalBookValue: assetTotalBookValue,
+          assetTotalReturn: assetTotalReturn,
+          delayedPrice: quote.delayedPrice,
+          delayedChange: quote.delayedChange,
+          assetShortName: assetShortName,
+          assetLongName: assetLongName,
+          assetLongBusinessSummary: assetLongBusinessSummary,
+          lots: lotSummaries,
+        });
+      } // End - If asset.length > 0
+    } // End - For each Asset
+
+    // Destructure portfolio record properties
+    const { portfolioName, portfolioDescription } = portfolioDetail._doc;
+
+    // Add summary object for this portfolio
+    portfolioSummaries.push({
+      summary: {
+        portfolioId: portfolioId,
+        portfolioName: portfolioName,
+        portfolioDescription: portfolioDescription,
+        portfolioNetWorth: portfolioNetWorth,
+        portfolioDaysChange: portfolioDaysChange,
+        portfolioTotalBookValue: portfolioTotalBookValue,
+        portfolioTotalReturn: portfolioTotalReturn,
+        assets: assetSummaries,
+      },
+    });
+  } // End - For each Portfolio
+
+  // Final Result
+  netWorthDetails = {
+    userId: userId,
+    userSummary: {
+      userNetworth: userNetWorth,
+      userDaysChange: userDaysChange,
+      userTotalBookValue: userTotalBookValue,
+      userTotalReturn: userTotalReturn,
+    },
+    portfolioSummaries: portfolioSummaries,
+  };
+
+  // Return result
+  res.status(200).send({
+    message: `The Users Networth for id: "${userId}" was retrieved!`,
+    successFlag: "OK",
+    success: true,
+    errorFlag: false,
+    netWorthDetails: netWorthDetails,
   });
 };
 
@@ -1066,6 +1338,7 @@ module.exports = {
   getUserPortfolios,
   getPortfolioDetail,
   getLotsByPortfolio,
+  getUserNetWorth,
   addAsset,
   addLot,
   updateLot,

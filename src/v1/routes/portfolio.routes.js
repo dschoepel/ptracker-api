@@ -196,6 +196,15 @@ router.get(
 );
 
 //
+// Get User Total Net Worth
+//
+router.get(
+  "/getUserNetWorth",
+  [authJwt.verifyToken],
+  portfolioController.getUserNetWorth
+);
+
+//
 // Get a quote for a symbol
 //
 router.get(
