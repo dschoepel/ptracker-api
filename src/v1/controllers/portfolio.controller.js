@@ -684,10 +684,10 @@ const getUserNetWorth = async (req, res, next) => {
 
     // Add summary object for this portfolio
     portfolioSummaries.push({
+      portfolioId: portfolioId,
+      portfolioName: portfolioName,
+      portfolioDescription: portfolioDescription,
       summary: {
-        portfolioId: portfolioId,
-        portfolioName: portfolioName,
-        portfolioDescription: portfolioDescription,
         portfolioNetWorth: portfolioNetWorth,
         portfolioDaysChange: portfolioDaysChange,
         portfolioTotalBookValue: portfolioTotalBookValue,
