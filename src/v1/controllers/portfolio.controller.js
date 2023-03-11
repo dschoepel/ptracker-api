@@ -680,10 +680,10 @@ const getUserNetWorth = async (req, res, next) => {
         });
         //Reset Asset accumulators
       } // End - If asset.length > 0
-      assetNetWorth = 0;
-      assetDaysChange = 0;
-      assetTotalBookValue = 0;
-      assetTotalReturn = 0;
+      // assetNetWorth = 0;
+      // assetDaysChange = 0;
+      // assetTotalBookValue = 0;
+      // assetTotalReturn = 0;
     } // End - For each Asset
 
     // Destructure portfolio record properties
@@ -708,7 +708,7 @@ const getUserNetWorth = async (req, res, next) => {
   netWorthDetails = {
     userId: userId,
     userSummary: {
-      userNetworth: userNetWorth,
+      userNetWorth: userNetWorth,
       userDaysChange: userDaysChange,
       userTotalBookValue: userTotalBookValue,
       userTotalReturn: userTotalReturn,
