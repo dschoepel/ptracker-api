@@ -546,6 +546,7 @@ const getUserNetWorth = async (req, res, next) => {
         let assetDaysChange = 0;
         let assetTotalBookValue = 0;
         let assetTotalReturn = 0;
+        let assetQtyTotal = 0;
         // Get quote for this asset
         let quote = 0;
         let symbol = assets[assetIndex].assetSymbol;
@@ -616,6 +617,8 @@ const getUserNetWorth = async (req, res, next) => {
             assetTotalReturn += lotTotalReturn;
             portfolioTotalReturn += lotTotalReturn;
             userTotalReturn += lotTotalReturn;
+            //TotalQty accumulator (asset only)
+            assetQtyTotal += filteredLots[lotIndex].lotQty;
 
             // Destructure lot record properties
             const {
@@ -671,6 +674,7 @@ const getUserNetWorth = async (req, res, next) => {
           assetDaysChange: assetDaysChange,
           assetTotalBookValue: assetTotalBookValue,
           assetTotalReturn: assetTotalReturn,
+          assetQtyTotal: assetQtyTotal,
           delayedPrice: quote.delayedPrice,
           delayedChange: quote.delayedChange,
           assetShortName: assetShortName,
