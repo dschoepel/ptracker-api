@@ -647,6 +647,7 @@ const getUserNetWorth = async (req, res, next) => {
               lotQty: lotQty,
               lotUnitPrice: lotUnitPrice,
               lotCostBasis: lotCostBasis,
+              lotAcquiredDate: lotAcquiredDate,
             });
           } //End - For each lot
         }
