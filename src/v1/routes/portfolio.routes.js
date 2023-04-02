@@ -252,4 +252,20 @@ router.get(
   portfolioController.getHistory
 );
 
+//
+// Get the news from yahoo finance
+//
+router.get(
+  "/getRSSNews/",
+  // [authJwt.verifyToken],
+  // [
+  //   query("symbol")
+  //     .trim()
+  //     .not()
+  //     .isEmpty()
+  //     .withMessage("Symbol cannot be blank!"),
+  // ],
+  portfolioController.getRSSNews
+);
+
 module.exports = router;

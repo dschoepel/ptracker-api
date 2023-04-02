@@ -2,6 +2,7 @@ const db = require("../models");
 const { validationResult } = require("express-validator");
 const ps = require("../utils/portfolioServices");
 const fetchFinanceData = require("../utils/fetchFinanceData");
+const fetchRSSNewsFeeds = require("../utils/fetchRSSNewsFeeds");
 const { Types } = require("mongoose");
 const { asset, mongoose, lot } = require("../models");
 const { json } = require("body-parser");
@@ -1334,6 +1335,39 @@ function adjustDates(startDate, endDate, nowDayNbr) {
   return { startDate: startDate, endDate: endDate };
 }
 
+// *****
+// Get a quote from the Financial Api using a symbol
+// *****
+const getRSSNews = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+
+  const newsFeed = await fetchRSSNewsFeeds.getRSSNews().catch((error) => {
+    //TODO Handle errors
+    console.log(error);
+  });
+
+  if (!newsFeed) {
+    //TODO Handle errors
+  } else {
+    // sort news feed newest to oldest
+    return res.status(200).send({
+      message: `Yahoo finance RSS News feed fetch was successful!`,
+      success: true,
+      errorFlag: false,
+      errorStatus: "OK",
+      newsFeed: newsFeed.newsFeed,
+    });
+  }
+};
+
 module.exports = {
   addPortfolio,
   updatePortfolio,
@@ -1352,4 +1386,5 @@ module.exports = {
   getQuote,
   getQuotes,
   getHistory,
+  getRSSNews,
 };
