@@ -13,7 +13,16 @@ async function getNews(url, source, newsFeed, response) {
           id,
           media: { thumbnail },
         } = feed.items[item];
+
+        //Handle inconistencies in data from feeds
         const pubdate = new Date(published);
+        console.log("Thumbnail: ", thumbnail);
+        const media = Array.isArray(thumbnail)
+          ? { url: thumbnail[0].url }
+          : thumbnail;
+
+        console.log("Media found in thumbnail: ", media);
+
         newsFeed.push({
           source: source,
           title,
@@ -22,7 +31,7 @@ async function getNews(url, source, newsFeed, response) {
           description,
           author,
           id,
-          thumbnail,
+          thumbnail: media,
         });
       } // for each feed item
     })
