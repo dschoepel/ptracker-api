@@ -49,11 +49,11 @@ async function getRSSNews() {
 
   // Yahoo Finance RSS feed
   const yahooUrl = `https://finance.yahoo.com/news/rssindex`;
-  await getNews(yahooUrl, "Yahoo", newsFeed, response);
+  await getNews(yahooUrl, "YahooFinance", newsFeed, response);
 
   // Wall Street Journal Finance RSS feed
   const wsjUrl = `https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml`;
-  await getNews(wsjUrl, "WSJ", newsFeed, response);
+  await getNews(wsjUrl, "WallStreetJournal", newsFeed, response);
 
   // Fortune Finance RSS feed
   const fortuneUrl = `https://fortune.com/feed/fortune-feeds/?id=3230629`;
@@ -65,7 +65,7 @@ async function getRSSNews() {
 
   // Money.com RSS feed
   const moneyDotComUrl = `https://money.com/money/feed/`;
-  await getNews(moneyDotComUrl, "MoneyDotCom", newsFeed, response);
+  await getNews(moneyDotComUrl, "Money.com", newsFeed, response);
 
   // Weathmanagement Top Stories RSS feed
   const wealthManagementUrl = `https://www.wealthmanagement.com/rss.xml`;
