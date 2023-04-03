@@ -1336,7 +1336,7 @@ function adjustDates(startDate, endDate, nowDayNbr) {
 }
 
 // *****
-// Get a quote from the Financial Api using a symbol
+// Get news from Financial RSS feeds
 // *****
 const getRSSNews = async (req, res) => {
   const errors = validationResult(req);
@@ -1359,7 +1359,7 @@ const getRSSNews = async (req, res) => {
   } else {
     // sort news feed newest to oldest
     return res.status(200).send({
-      message: `Yahoo finance RSS News feed fetch was successful!`,
+      message: `RSS Financial News feed fetch was successful!`,
       success: true,
       errorFlag: false,
       errorStatus: "OK",

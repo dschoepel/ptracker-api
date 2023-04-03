@@ -1,70 +1,68 @@
 const { parse } = require("rss-to-json");
 
-// Get rss news from Yahoo finance
+async function getNews(url, source, newsFeed, response) {
+  await parse(url)
+    .then((feed) => {
+      for (let item = 0; item < feed.items.length; item++) {
+        const {
+          title,
+          link,
+          published,
+          description,
+          author,
+          id,
+          media: { thumbnail },
+        } = feed.items[item];
+        const pubdate = new Date(published);
+        newsFeed.push({
+          source: source,
+          title,
+          link,
+          published: pubdate.toISOString(),
+          description,
+          author,
+          id,
+          thumbnail,
+        });
+      } // for each feed item
+    })
+    .catch((err) => {
+      // TODO handle errors
+
+      console.error("error:" + err);
+      response = { status: failed, feed: err };
+    });
+}
+
+// Get news headlines from various RSS feeds
 async function getRSSNews() {
-  const yahooUrl = `https://finance.yahoo.com/news/rssindex`;
   let response = {};
   let newsFeed = [];
 
-  await parse(yahooUrl)
-    .then((feed) => {
-      for (let item = 0; item < feed.items.length; item++) {
-        const {
-          title,
-          link,
-          published,
-          description,
-          id,
-          media: { thumbnail },
-        } = feed.items[item];
-        const pubdate = new Date(published);
-        newsFeed.push({
-          title,
-          link,
-          published: pubdate.toISOString(),
-          description,
-          id,
-          thumbnail,
-        });
-      } // for each feed item
-    })
-    .catch((err) => {
-      // TODO handle errors
+  // Yahoo Finance RSS feed
+  const yahooUrl = `https://finance.yahoo.com/news/rssindex`;
+  await getNews(yahooUrl, "Yahoo", newsFeed, response);
 
-      console.error("error:" + err);
-      response = { status: failed, feed: err };
-    });
-
+  // Wall Street Journal Finance RSS feed
   const wsjUrl = `https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml`;
+  await getNews(wsjUrl, "WSJ", newsFeed, response);
 
-  await parse(wsjUrl)
-    .then((feed) => {
-      for (let item = 0; item < feed.items.length; item++) {
-        const {
-          title,
-          link,
-          published,
-          description,
-          id,
-          media: { thumbnail },
-        } = feed.items[item];
-        const pubdate = new Date(published);
-        newsFeed.push({
-          title,
-          link,
-          published: pubdate.toISOString(),
-          description,
-          id,
-          thumbnail,
-        });
-      } // for each feed item
-    })
-    .catch((err) => {
-      // TODO handle errors
+  // Fortune Finance RSS feed
+  const fortuneUrl = `https://fortune.com/feed/fortune-feeds/?id=3230629`;
+  await getNews(fortuneUrl, "Fortune", newsFeed, response);
 
-      console.error("error:" + err);
-      response = { status: failed, feed: err };
-    });
+  // CNN Money Top Stories RSS feed
+  const cnnMoneyUrl = `http://rss.cnn.com/rss/money_topstories.rss`;
+  await getNews(cnnMoneyUrl, "CNNMoney", newsFeed, response);
+
+  // Money.com RSS feed
+  const moneyDotComUrl = `https://money.com/money/feed/`;
+  await getNews(moneyDotComUrl, "MoneyDotCom", newsFeed, response);
+
+  // Weathmanagement Top Stories RSS feed
+  const wealthManagementUrl = `https://www.wealthmanagement.com/rss.xml`;
+  await getNews(wealthManagementUrl, "WealthManagement", newsFeed, response);
+
   // sort articles by date newest to oldest
   newsFeed.sort(function (a, b) {
     return new Date(b.published) - new Date(a.published);
