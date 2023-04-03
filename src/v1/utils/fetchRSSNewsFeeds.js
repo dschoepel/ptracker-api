@@ -15,13 +15,12 @@ async function getNews(url, source, newsFeed, response) {
         } = feed.items[item];
 
         //Handle inconistencies in data from feeds
+        // Convert published date to date object
         const pubdate = new Date(published);
-        console.log("Thumbnail: ", thumbnail);
+        // When there is an array of thumbnail images, use first one
         const media = Array.isArray(thumbnail)
           ? { url: thumbnail[0].url }
           : thumbnail;
-
-        console.log("Media found in thumbnail: ", media);
 
         newsFeed.push({
           source: source,
