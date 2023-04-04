@@ -17,6 +17,7 @@ async function getNews(url, source, newsFeed, response) {
         //Handle inconistencies in data from feeds
         // Convert published date to date object
         const pubdate = new Date(published);
+
         // When there is an array of thumbnail images, use first one
         const media = Array.isArray(thumbnail)
           ? { url: thumbnail[0].url }
@@ -30,7 +31,7 @@ async function getNews(url, source, newsFeed, response) {
             source: source,
             title,
             link,
-            published: pubdate.toISOString(),
+            published: pubdate.getTime(),
             description,
             author,
             id,
