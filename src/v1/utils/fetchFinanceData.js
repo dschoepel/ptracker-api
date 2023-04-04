@@ -6,24 +6,36 @@ async function getQuote(symbol) {
   const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
   let detail = {};
 
-  await fetch(url, options)
-    .then((res) => res.json())
-    .then((json) => {
-      detail = json.quoteResponse.result.filter(
-        (quote) => quote.symbol === symbol
-      );
-      if (!detail) {
-        // TODO handle errors here
-        console.log("Symbol Fetch error - result missing", data?.quoteResponse);
-      } else {
-        // Found symbol
-        return { ...detail[0] };
-      }
-    })
-    .catch((err) => {
-      // TODO handle errors
-      console.error("error:" + err);
-    });
+  let retry = 0; // retry counter to get quote
+  let maxRetries = 3;
+  let success = false; // Flag a successful quote request
+
+  while (retry < maxRetries && !success) {
+    await fetch(url, options)
+      .then((res) => res.json())
+      .then((json) => {
+        detail = json.quoteResponse.result.filter(
+          (quote) => quote.symbol === symbol
+        );
+        if (!detail) {
+          // TODO handle errors here
+          console.log(
+            "Symbol Fetch error - result missing",
+            data?.quoteResponse
+          );
+        } else {
+          // Found symbol
+          success = true;
+          return { ...detail[0] };
+        } // If !detail (symbol not found)
+      })
+      .catch((err) => {
+        // TODO handle errors
+        console.error("error symbol - error:", symbol, err);
+      });
+    retry = retry + 1; //Somtimes Yahoo rejects requests, try again if needed
+  }
+
   // console.log("fetch quote detail: ", detail);
   return detail;
 }

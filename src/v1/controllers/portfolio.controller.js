@@ -565,6 +565,7 @@ const getUserNetWorth = async (req, res, next) => {
             delayedChange: assetPriceTable[index].delayedChange,
           };
         } else {
+          console.log("Symbol: ", symbol);
           const quoteDetail = await fetchFinanceData
             .getQuote(symbol)
             .catch((error) => {
@@ -572,7 +573,7 @@ const getUserNetWorth = async (req, res, next) => {
               console.log(error);
             });
           // TODO Assumes quote is in first array position, should look it up...
-
+          // check to see if quote was found Symbol???
           quote = quoteDetail
             ? quoteDetail[0]
             : { delayedPrice: 0, delayedChange: 0 };
