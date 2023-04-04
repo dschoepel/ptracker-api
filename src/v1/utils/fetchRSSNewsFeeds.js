@@ -21,17 +21,22 @@ async function getNews(url, source, newsFeed, response) {
         const media = Array.isArray(thumbnail)
           ? { url: thumbnail[0].url }
           : thumbnail;
+        // Filter news to less than 3 months old
+        let threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-        newsFeed.push({
-          source: source,
-          title,
-          link,
-          published: pubdate.toISOString(),
-          description,
-          author,
-          id,
-          thumbnail: media,
-        });
+        if (pubdate > threeMonthsAgo) {
+          newsFeed.push({
+            source: source,
+            title,
+            link,
+            published: pubdate.toISOString(),
+            description,
+            author,
+            id,
+            thumbnail: media,
+          });
+        }
       } // for each feed item
     })
     .catch((err) => {

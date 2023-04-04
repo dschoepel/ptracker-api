@@ -565,7 +565,7 @@ const getUserNetWorth = async (req, res, next) => {
             delayedChange: assetPriceTable[index].delayedChange,
           };
         } else {
-          console.log("Symbol: ", symbol);
+          // console.log("Symbol: ", symbol);
           const quoteDetail = await fetchFinanceData
             .getQuote(symbol)
             .catch((error) => {
