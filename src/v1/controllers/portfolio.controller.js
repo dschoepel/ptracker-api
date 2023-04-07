@@ -1220,7 +1220,11 @@ const getHistory = async (req, res) => {
       //TODO Handle errors
       console.log("Error getting symbol history: ", symbol, error);
     });
-  console.log("Fetched symbol history: ", symbol, historyDetail);
+  console.log(
+    "Fetched symbol history: ",
+    symbol,
+    historyDetail.chart.result[0]
+  );
   if (!historyDetail) {
     //TODO Handle errors
   } else {
