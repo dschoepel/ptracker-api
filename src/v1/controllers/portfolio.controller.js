@@ -1220,15 +1220,11 @@ const getHistory = async (req, res) => {
       //TODO Handle errors
       console.log("Error getting symbol history: ", symbol, error);
     });
-  console.log(
-    "Fetched symbol history: ",
-    symbol,
-    historyDetail.chart.result[0]
-  );
+
   if (!historyDetail) {
     //TODO Handle errors
   } else {
-    console.log("history detail: ", historyDetail);
+    // console.log("history detail: ", historyDetail);
     const history = historyDetail.chart.result[0];
     let historyChart = [];
     for (let i = 0; i < history.timestamp.length; ++i) {
@@ -1278,30 +1274,30 @@ function setChartDates() {
   const END_MIN = 00;
   const LOCAL_OFFSET_MILLIS = new Date().getTimezoneOffset() * (1000 * 60);
   let startDate = new Date();
-  console.log(
-    "Start DAte initialized: ",
-    startDate.getTime(),
-    LOCAL_OFFSET_MILLIS
-  );
+  // console.log(
+  //   "Start DAte initialized: ",
+  //   startDate.getTime(),
+  //   LOCAL_OFFSET_MILLIS
+  // );
   startDate.setHours(START_HR, START_MIN, 00);
-  console.log(
-    "after set hour to 00: ",
-    startDate.getTime() - LOCAL_OFFSET_MILLIS
-  );
+  // console.log(
+  //   "after set hour to 00: ",
+  //   startDate.getTime() - LOCAL_OFFSET_MILLIS
+  // );
   // startDate.setMinutes(START_MIN);
   // let startTime = startDate.getTime();
   let startTime = new Date(startDate).getTime();
-  console.log("Start date: ", startTime);
+  // console.log("Start date: ", startTime);
   let endDate = new Date();
   endDate.setHours(END_HR);
   endDate.setMinutes(END_MIN);
   // let endTime = endDate.getTime();
   let endTime = new Date(endDate).getTime();
-  console.log("End date: ", endTime);
+  // console.log("End date: ", endTime);
   const now = new Date();
   // const nowTime = now.getTime();
   const nowTime = new Date(now).getTime();
-  console.log("Now Time: ", nowTime);
+  // console.log("Now Time: ", nowTime);
   const nowDayNbr = now.getDay();
   const nowHr = now.getHours();
   let dateRange = { startDate: startDate, endDate: endDate };
@@ -1312,12 +1308,12 @@ function setChartDates() {
     nowTime >= startTime && nowTime <= endTime
       ? "is in trading hours"
       : "is NOT in trading hours";
-  console.log(test, nowHr);
+  // console.log(test, nowHr);
   const weekday = nowDayNbr > 0 && nowDayNbr <= 5 ? true : false;
   const tradingHrs = nowTime >= startTime && nowTime <= endTime ? true : false;
-  console.log("start: ", startTime, "end: ", endTime);
-  console.log("weekday", nowDayNbr, weekday ? "true" : "false");
-  console.log("tradingHrs", nowTime, tradingHrs ? "true" : "false");
+  // console.log("start: ", startTime, "end: ", endTime);
+  // console.log("weekday", nowDayNbr, weekday ? "true" : "false");
+  // console.log("tradingHrs", nowTime, tradingHrs ? "true" : "false");
 
   // Use previous trading day if not a weekday or is a weekday and time is before trading starts
   if (!weekday) {
