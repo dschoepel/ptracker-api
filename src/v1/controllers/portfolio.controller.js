@@ -1217,7 +1217,7 @@ const getHistory = async (req, res) => {
     .getHistory(symbol, startDate, endDate)
     .catch((error) => {
       //TODO Handle errors
-      console.log(error);
+      console.log("Error getting symbol history: ", symbol, error);
     });
 
   if (!historyDetail) {
