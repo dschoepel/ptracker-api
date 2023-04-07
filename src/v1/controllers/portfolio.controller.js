@@ -1201,6 +1201,7 @@ const getQuotes = async (req, res) => {
 // Get the history for a symbol from the Financial Api
 // *****
 const getHistory = async (req, res) => {
+  // TODO add holidays??
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).send({
@@ -1219,7 +1220,7 @@ const getHistory = async (req, res) => {
       //TODO Handle errors
       console.log("Error getting symbol history: ", symbol, error);
     });
-
+  console.log("Fetched symbol history: ", symbol, historyDetail);
   if (!historyDetail) {
     //TODO Handle errors
   } else {
