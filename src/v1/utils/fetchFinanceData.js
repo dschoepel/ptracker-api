@@ -98,7 +98,7 @@ async function getHistory(symbol, startDate, endDate) {
   let options = { method: "GET" };
   // const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m&period1=${startDate}&period2=${endDate}`;
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m`;
-  console.log("Fetch history url: ", url);
+  // console.log("Fetch history url: ", url);
   let detail = {};
   await fetch(url, options)
     .then((res) => res.json())
