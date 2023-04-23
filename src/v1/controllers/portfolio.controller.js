@@ -775,6 +775,57 @@ const getUserPortfolios = async (req, res, next) => {
 };
 
 //
+// Get default (first one) of users PORTFOLIOs
+//
+const getDefaultPortfolio = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, entered data is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+  const { userId } = req;
+
+  const portfolioDetailArray = await Portfolio.find({ userId: userId })
+    .populate("assets")
+    .populate("userId", "username")
+    .sort({ portfolioName: 1 })
+    .then((portfolioArray) => {
+      return portfolioArray;
+    })
+    .catch((error) => {
+      res.status(204).send({
+        message: `Error: There were no records retrieved for ${userId}!  Additional error details: ${error}`,
+        successFlag: "NOT-FOUND",
+        success: false,
+        errorFlag: true,
+        portfolioDetailArray: [],
+      });
+    });
+
+  const defaultPortfolio =
+    portfolioDetailArray.length > 0
+      ? portfolioDetailArray[0]
+      : {
+          portfolioId: "",
+          portfolioName: "Not Found",
+          portfolioDescription:
+            "User does not have any portfolios defined, use add a portfolio!",
+        };
+
+  res.status(200).send({
+    message: `The default portfolio for userId "${userId}" was retrieved!`,
+    successFlag: "OK",
+    success: true,
+    errorFlag: false,
+    defaultPortfolio: defaultPortfolio,
+  });
+};
+
+//
 // Get all of the Users PORTFOLIOS
 //
 const getLotsByPortfolio = async (req, res, next) => {
@@ -1143,7 +1194,7 @@ const getQuote = async (req, res) => {
   const symbol = req.query.symbol.toUpperCase();
   const quoteDetail = await fetchFinanceData.getQuote(symbol).catch((error) => {
     //TODO Handle errors
-    console.log(error);
+    console.log(`Error fetching quote for symbo ${symbol}! Error: `, error);
   });
 
   if (!quoteDetail) {
@@ -1378,6 +1429,7 @@ module.exports = {
   removePortfolioAsset,
   getOnePortfolio,
   getUserPortfolios,
+  getDefaultPortfolio,
   getPortfolioDetail,
   getLotsByPortfolio,
   getUserNetWorth,

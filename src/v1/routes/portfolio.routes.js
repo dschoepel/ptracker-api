@@ -196,6 +196,15 @@ router.get(
 );
 
 //
+// Get Default Portfolio for User
+//
+router.get(
+  "/getDefaultPortfolio",
+  [authJwt.verifyToken],
+  portfolioController.getDefaultPortfolio
+);
+
+//
 // Get User Total Net Worth
 //
 router.get(
