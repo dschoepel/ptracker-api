@@ -912,6 +912,47 @@ const getPortfolioDetail = async (req, res, next) => {
 };
 
 //
+// GET an ASSET's Detail information
+//
+const getAssetDetail = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).send({
+      message: "Validation failed, assetId is incorrect!",
+      errors: errors.array(),
+      errorStatus: "VALIDATION",
+      errorFlag: true,
+    });
+  }
+
+  const assetId = req.query.assetId;
+  console.log("assetId to retrieve", assetId, req.query.assetId.length);
+  const response = await ps.getAssetDetail(assetId);
+  console.log("fetch asset detail response: ", response);
+  if (response.success) {
+    res.status(200).send({
+      assetDetail: response.assetDetail,
+      assetId: response.assetId,
+      message: `${response.assetDetail.assetDisplayName}. ${response.message}`,
+      success: true,
+      errorFlag: false,
+      statusCode: "OK",
+    });
+  } else {
+    if (response.assetId === "ASSET_NOT_FOUND") {
+      res.status(404).send({
+        assetDetail: response.assetDetail,
+        assetId: response.assetId,
+        message: response.message,
+        success: false,
+        errorFlag: true,
+        statusCode: response.assetId,
+      });
+    }
+  }
+};
+
+//
 // ADD an ASSET to the global list of assets used to build portfolio's
 //
 const addAsset = async (req, res, next) => {
@@ -1434,6 +1475,7 @@ module.exports = {
   getLotsByPortfolio,
   getUserNetWorth,
   addAsset,
+  getAssetDetail,
   addLot,
   updateLot,
   deleteLot,

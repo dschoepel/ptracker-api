@@ -123,6 +123,26 @@ router.post(
 router.post("/addAsset", [authJwt.verifyToken], portfolioController.addAsset);
 
 //
+// Get asset detail - only verified user can add asset
+//
+router.get(
+  "/getAssetDetail",
+  [authJwt.verifyToken],
+  [
+    query("assetId")
+      .trim()
+      .not()
+      .isEmpty()
+      .withMessage(
+        "AssetId cannot be blank (format is ?assetid=63c7500d1e62249832eb8d50 !"
+      )
+      .isLength({ min: 24, max: 24 })
+      .withMessage("The assetId must be 24 characters long!"),
+  ],
+  portfolioController.getAssetDetail
+);
+
+//
 // Add a new Lot to a portfolio for a user account
 //
 router.post(

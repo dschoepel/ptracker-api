@@ -30,6 +30,32 @@ const getAsset = async (symbol) => {
 };
 
 //
+//Get Asset Detail
+//
+const getAssetDetail = async (assetId) => {
+  //Lookup asset using the symbol, if found, return the id, signal an error if not
+  console.log("getAssetDetail service assetId: ", assetId);
+  const asset = await Asset.findOne({ _id: assetId });
+  if (!asset) {
+    return {
+      assetDetail: {},
+      assetId: "ASSET_NOT_FOUND",
+      error: true,
+      success: false,
+      message: `Invalid asset id - ${assetId}!`,
+      errorStatus: "ERROR_ASSET_ID_NOT_FOUND",
+    };
+  }
+  return {
+    assetDetail: asset,
+    assetId: asset._id,
+    error: false,
+    success: true,
+    message: `Found ${assetId} in the db!`,
+  };
+};
+
+//
 //Get Asset Symbols - convert array of Ids to Symbols
 //
 const getAssetSymbol = async (assetId) => {
@@ -457,6 +483,7 @@ const removeLots = async (portfolioId, assetId) => {
 
 module.exports = {
   getAsset,
+  getAssetDetail,
   removeAsset,
   getAssetSymbol,
   addAsset,
