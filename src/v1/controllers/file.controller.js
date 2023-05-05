@@ -64,13 +64,11 @@ const download = (req, res) => {
   console.log("Downloading: ", path.join(directoryPath, "/", fileName));
   res.download(directoryPath + "/" + fileName, fileName, (err) => {
     if (err) {
-      res
-        .status(500)
-        .send({
-          message: `Could not download the file ${fileName}. ${err}`,
-          errorStatus: "SYSTEM",
-          errorFlag: true,
-        });
+      res.status(500).send({
+        message: `Could not download the file ${fileName}. ${err}`,
+        errorStatus: "SYSTEM",
+        errorFlag: true,
+      });
     }
   });
 };

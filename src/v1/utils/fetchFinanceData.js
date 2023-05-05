@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 // Get symbol details from Yahoo finance API
 async function getQuote(symbol) {
   let options = { method: "GET" };
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+  const url = `https://query1.finance.yahoo.com/v6/finance/quote?symbols=${symbol}`;
   let detail = {};
 
   let retry = 0; // retry counter to get quote
