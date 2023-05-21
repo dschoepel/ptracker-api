@@ -288,7 +288,7 @@ async function removeAsset(portfolioId, assetIdToRemove) {
       if (!updatedPortfolio) {
         //Handle error where null was returned system error
       } else {
-        messages.push(`Asset id: ${assetIdToRemove} removed!`);
+        messages.push(`Asset id: ${assetIdToRemove} removed from Portfolio!`);
         return {
           message: messages,
           errorStatus: "OK",
