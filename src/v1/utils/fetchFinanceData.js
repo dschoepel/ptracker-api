@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const yahooFinance = require("yahoo-finance2").default;
 
 // Get symbol details from Yahoo finance API
 async function getQuote(symbol) {
@@ -10,31 +11,65 @@ async function getQuote(symbol) {
   let maxRetries = 3;
   let success = false; // Flag a successful quote request
 
-  while (retry < maxRetries && !success) {
-    await fetch(url, options)
-      .then((res) => res.json())
-      .then((json) => {
-        detail = json.quoteResponse.result.filter(
-          (quote) => quote.symbol === symbol
-        );
-        if (!detail) {
-          // TODO handle errors here
-          console.log(
-            "Symbol Fetch error - result missing",
-            data?.quoteResponse
-          );
-        } else {
-          // Found symbol
+  try {
+    detail = await yahooFinance.quote(symbol).then((quote) => {
+      if (quote) {
+        if (symbol.toUpperCase() != "SALE") {
           success = true;
-          return { ...detail[0] };
-        } // If !detail (symbol not found)
-      })
-      .catch((err) => {
-        // TODO handle errors
-        console.error("error symbol - error:", symbol, err);
-      });
-    retry = retry + 1; //Somtimes Yahoo rejects requests, try again if needed
+        } else {
+          success = false;
+          notASymbol = true;
+        }
+      }
+
+      return quote;
+    });
+  } catch (error) {
+    console.log("Error on fetch symbol", symbol, error);
   }
+
+  // while (retry < maxRetries && !success) {
+  //   await yahooFinance
+  //     .quote(symbol)
+  //     .then((detail) => {
+  //       if (!detail) {
+  //         // TODO handle errors
+  //         console.log("Symbol Fetch error - result missing", data);
+  //       } else {
+  //         // Found symbol
+  //         success = true;
+  //         return { ...detail };
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       // TODO handle errors
+  //       console.error("error symbol - error:", symbol, err);
+  //     });
+
+  //   // await fetch(url, options)
+  //   //   .then((res) => res.json())
+  //   //   .then((json) => {
+  //   //     detail = json.quoteResponse.result.filter(
+  //   //       (quote) => quote.symbol === symbol
+  //   //     );
+  //   //     if (!detail) {
+  //   //       // TODO handle errors here
+  //   //       console.log(
+  //   //         "Symbol Fetch error - result missing",
+  //   //         data?.quoteResponse
+  //   //       );
+  //   //     } else {
+  //   //       // Found symbol
+  //   //       success = true;
+  //   //       return { ...detail[0] };
+  //   //     } // If !detail (symbol not found)
+  //   //   })
+  //   //   .catch((err) => {
+  //   //     // TODO handle errors
+  //   //     console.error("error symbol - error:", symbol, err);
+  //   //   });
+  //   retry = retry + 1; //Somtimes Yahoo rejects requests, try again if needed
+  // }
 
   // console.log("fetch quote detail: ", detail);
   return detail;

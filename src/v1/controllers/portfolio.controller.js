@@ -574,8 +574,11 @@ const getUserNetWorth = async (req, res, next) => {
             });
           // TODO Assumes quote is in first array position, should look it up...
           // check to see if quote was found Symbol???
+          // quote = quoteDetail
+          //   ? quoteDetail[0]
+          //   : { delayedPrice: 0, delayedChange: 0 };
           quote = quoteDetail
-            ? quoteDetail[0]
+            ? quoteDetail
             : { delayedPrice: 0, delayedChange: 0 };
           quote = {
             symbol: quote.symbol,
@@ -1241,7 +1244,8 @@ const getQuote = async (req, res) => {
   if (!quoteDetail) {
     //TODO Handle errors
   } else {
-    const quote = quoteDetail[0];
+    const quote = quoteDetail;
+    // const quote = quoteDetail[0];
     return res.status(200).send({
       message: `Quote for ${quote.symbol} was successful!`,
       success: true,
