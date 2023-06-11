@@ -72,7 +72,7 @@ async function getQuote(symbol) {
   //   retry = retry + 1; //Somtimes Yahoo rejects requests, try again if needed
   // }
 
-  // console.log("fetch quote detail: ", detail);
+  console.log("fetch quote detail: ", detail);
   return detail;
 }
 
