@@ -131,7 +131,8 @@ async function addAsset(symbol) {
     longName,
     displayName,
     currency,
-  } = assetDetail.length > 0 ? assetDetail[0] : dummy;
+  } = assetDetail ? assetDetail : dummy;
+  // } = assetDetail.length > 0 ? assetDetail[0] : dummy;
 
   // Get company profile details
   const assetProfile = await fetchFinanceData
