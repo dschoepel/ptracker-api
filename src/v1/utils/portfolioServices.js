@@ -122,7 +122,7 @@ async function addAsset(symbol) {
         asset: dummy,
       };
     });
-  console.log("assetDetail: ", assetDetail, assetDetail.length);
+
   const {
     symbol: aSymbol,
     quoteType,
@@ -132,7 +132,6 @@ async function addAsset(symbol) {
     displayName,
     currency,
   } = assetDetail ? assetDetail : dummy;
-  // } = assetDetail.length > 0 ? assetDetail[0] : dummy;
 
   // Get company profile details
   const assetProfile = await fetchFinanceData
