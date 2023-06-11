@@ -122,7 +122,7 @@ async function addAsset(symbol) {
         asset: dummy,
       };
     });
-  console.log("assetDetail: ", assetDetail);
+  console.log("assetDetail: ", assetDetail, assetDetail.length);
   const {
     symbol: aSymbol,
     quoteType,
