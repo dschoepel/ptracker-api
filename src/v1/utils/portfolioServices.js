@@ -98,6 +98,7 @@ async function addAsset(symbol) {
   const assetDetail = await fetchFinanceData
     .getQuote(symbol)
     .then((asset) => {
+      console.log("asset: ", asset);
       if (!asset) {
         return {
           assetSymbol: symbol,
