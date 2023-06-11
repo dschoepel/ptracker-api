@@ -273,6 +273,7 @@ const addPortfolioAsset = async (req, res, next) => {
   });
 
   if ((response.assetSymbol = assetToAdd)) {
+    console.log("Debugging response: ", response, "AssetToAdd: ", assetToAdd);
     if (response.assetId === "SYMBOL_NOT_FOUND") {
       return res.status(400).send({
         message: `The asset: ${assetToAdd} was not found using the Yahoo Finance API!  It was not added!`,
