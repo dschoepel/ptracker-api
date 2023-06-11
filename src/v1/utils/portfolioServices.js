@@ -98,7 +98,6 @@ async function addAsset(symbol) {
   const assetDetail = await fetchFinanceData
     .getQuote(symbol)
     .then((asset) => {
-      console.log("asset: ", asset);
       if (!asset) {
         return {
           assetSymbol: symbol,
@@ -123,7 +122,7 @@ async function addAsset(symbol) {
         asset: dummy,
       };
     });
-
+  console.log("assetDetail: ", assetDetail);
   const {
     symbol: aSymbol,
     quoteType,
