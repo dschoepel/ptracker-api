@@ -13,6 +13,7 @@ async function getQuote(symbol) {
 
   try {
     detail = await yahooFinance.quote(symbol).then((quote) => {
+      console.log("getQuote: ", symbol, quote);
       if (quote) {
         if (symbol.toUpperCase() != "SALE") {
           success = true;
