@@ -1364,10 +1364,10 @@ const getHistory = async (req, res) => {
 
 function setChartDates() {
   // Assume this system is running in GMT
-  const START_HR = 08; // 00:00am EST
+  const START_HR = 8; // 00:00am EST
   const START_MIN = 30;
   const END_HR = 15; // 11:59 pm EST
-  const END_MIN = 00;
+  const END_MIN = 0;
   const LOCAL_OFFSET_MILLIS = new Date().getTimezoneOffset() * (1000 * 60);
   let startDate = new Date();
   // console.log(
@@ -1375,7 +1375,7 @@ function setChartDates() {
   //   startDate.getTime(),
   //   LOCAL_OFFSET_MILLIS
   // );
-  startDate.setHours(START_HR, START_MIN, 00);
+  startDate.setHours(START_HR, START_MIN, 0);
   // console.log(
   //   "after set hour to 00: ",
   //   startDate.getTime() - LOCAL_OFFSET_MILLIS

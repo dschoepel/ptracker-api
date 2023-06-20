@@ -30,7 +30,12 @@ const app = express();
 const PORT = process.env.API_PORT || 8080;
 global.__basedir = __dirname;
 
-app.use(cors());
+// Cors options to be included in app.use(cors(corsOptions))
+var corsOptions = {
+  origin: ["https://ptraker.com", "http://localhost:3000"],
+  optionsSuccessStatus: 200, // For legacy browser support
+};
+app.use(cors(corsOptions));
 
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
@@ -40,7 +45,7 @@ app.use(uploadFile);
 app.use("/images", express.static(path.join(__dirname, "v1", "images")));
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, PATCH, DELETE"
