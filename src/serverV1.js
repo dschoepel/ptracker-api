@@ -35,7 +35,7 @@ var corsOptions = {
   origin: ["https://ptraker.com", "http://localhost:3000"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
