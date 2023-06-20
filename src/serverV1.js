@@ -45,7 +45,7 @@ app.use(uploadFile);
 app.use("/images", express.static(path.join(__dirname, "v1", "images")));
 
 app.use((req, res, next) => {
-  // res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, PATCH, DELETE"
