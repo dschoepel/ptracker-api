@@ -74,10 +74,11 @@ app.use("/api/v1/file", v1FileRouter);
 app.use("/api/v1/portfolio", v1PortfolioRouter);
 
 app.get("/", (req, res) => {
-  res.json({
-    message:
-      "Welcome to the ptraker.com API, Version 1 Docs are available on https://api.ptraker.com/api/v1/docs.",
-  });
+  res.sendFile(path.join(__dirname + "/v1/public/index.html"));
+  // res.json({
+  //   message:
+  //     "Welcome to the ptraker.com API, Version 1 Docs are available on https://api.ptraker.com/api/v1/docs.",
+  // });
 });
 
 // set port, listen for requests
