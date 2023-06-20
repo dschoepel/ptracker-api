@@ -56,6 +56,7 @@ const Role = db.role;
 db.mongoose
   .connect(`${dbConfig.DB_URL}`, {
     autoIndex: true,
+    dbName: `${dbConfig.DB_NAME}`,
   })
   .then(() => {
     console.log("Successfully connected to MongoDB!");
