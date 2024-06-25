@@ -3,7 +3,7 @@ const yahooFinance = require("yahoo-finance2").default;
 
 // Get symbol details from Yahoo finance API
 async function getQuote(symbol) {
-  let options = { method: "GET" };
+  let options = { method: "GET", headers: { "User-Agent": "Mozilla/5.0" } };
   const url = `https://query1.finance.yahoo.com/v6/finance/quote?symbols=${symbol}`;
   let detail = {};
 
@@ -77,7 +77,7 @@ async function getQuote(symbol) {
 
 // Get symbol details from Yahoo finance API
 async function getQuotes(searchText) {
-  let options = { method: "GET" };
+  let options = { method: "GET", headers: { "User-Agent": "Mozilla/5.0" } };
   // const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
   const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${searchText}`;
   let quotes = [];
@@ -104,7 +104,7 @@ async function getQuotes(searchText) {
 
 //Fetch company profile data from Yahoo finance
 async function getProfile(symbol) {
-  let options = { method: "GET" };
+  let options = { method: "GET", headers: { "User-Agent": "Mozilla/5.0" } };
   const url = `https://query1.finance.yahoo.com/v11/finance/quoteSummary/${symbol}?modules=assetProfile`;
   let detail = {};
 
@@ -130,7 +130,7 @@ async function getProfile(symbol) {
 }
 
 async function getHistory(symbol, startDate, endDate) {
-  let options = { method: "GET" };
+  let options = { method: "GET", headers: { "User-Agent": "Mozilla/5.0" } };
   // const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m&period1=${startDate}&period2=${endDate}`;
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?metrics=high&interval=15m`;
   // console.log("Fetch history url: ", url);
